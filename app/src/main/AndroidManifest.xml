@@ -23,11 +23,15 @@
             android:theme="@android:style/Theme.Material.Dialog"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".GameOverDialogActivity"
+            android:theme="@android:style/Theme.Material.Dialog"
+            android:screenOrientation="portrait"/>
+
         <activity android:name=".NavigationActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"/>
 
-        <activity android:name=".LevelOneActivity"
+        <activity android:name=".LevelActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"/>
 

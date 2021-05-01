@@ -8,12 +8,14 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-public class LevelOneActivity extends Activity {
+public class LevelActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_level_one);
-        replaceView(findViewById(R.id.boardView), new GameView(this));
+        setContentView(R.layout.activity_level);
+
+        View chessBoardView = new GameView(this, findViewById(R.id.indicatorView));
+        replaceView(findViewById(R.id.boardView), chessBoardView);
     }
 
     private void replaceView(View oldView, View newView) {

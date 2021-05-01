@@ -8,13 +8,24 @@
 
     <View
         android:id="@+id/boardView"
-        android:layout_width="344dp"
-        android:layout_height="486dp"
+        android:layout_width="390dp"
+        android:layout_height="390dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias=".5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias=".2" />
+        app:layout_constraintVertical_bias=".3" />
+
+    <View
+        android:id="@+id/indicatorView"
+        android:layout_width="64dp"
+        android:layout_height="47dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias=".5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias=".05" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

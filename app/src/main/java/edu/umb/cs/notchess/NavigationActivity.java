@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,7 +12,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
@@ -76,7 +74,7 @@ public class NavigationActivity extends FragmentActivity {
             View rootView = inflater.inflate(R.layout.fragment_section_levels, container, false);
             rootView.findViewById(R.id.buttonLevelOne)
                     .setOnClickListener(view -> {
-                        Intent intent = new Intent(getActivity(), LevelOneActivity.class);
+                        Intent intent = new Intent(getActivity(), LevelActivity.class);
                         startActivity(intent);
                     });
             return rootView;
