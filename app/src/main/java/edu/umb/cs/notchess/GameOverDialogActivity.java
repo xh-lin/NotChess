@@ -17,7 +17,7 @@ public class GameOverDialogActivity extends Activity {
         setContentView(R.layout.activity_dialog_game_over);
 
         Intent intent = getIntent();
-        String winnerText = intent.getStringExtra(Chessboard.winnerTextKey);
+        String winnerText = intent.getStringExtra(getString(R.string.winner_text));
         ((TextView) findViewById(R.id.WinnerTextView)).setText(winnerText);
     }
 

@@ -6,8 +6,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -20,27 +22,63 @@ public class Chessboard {
         B_Knight(-4), B_Rook(-5), B_Pawn(-6), B_Heart(-7);
 
         public final int value;
-        private int[][] knightMoves = {{1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}};
+        private final int[][] knightMoves = {{1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1},
+                {-2, 1}, {-1, 2}};
 
-        static Bitmap wHeartBitmap;
-        static Bitmap bHeartBitmap;
-        static Rect heartRect;
-        static Bitmap piecesBitmap;
-        static int spriteSize;
         static Rect spriteRect;
+        static Bitmap[] wPieceBitmaps;
+        static Bitmap[] bPieceBitmaps;
+        static Bitmap[] wrPieceBitmaps;
+        static Bitmap[] brPieceBitmaps;
 
-        Piece(final int value) {
+        Piece(int value) {
             this.value = value;
         }
 
         static void loadAssets(Resources res) {
-            wHeartBitmap = BitmapFactory.decodeResource(res, R.drawable.heart_white);
-            bHeartBitmap = BitmapFactory.decodeResource(res, R.drawable.heart_black);
-            heartRect = new Rect(0, 0, bHeartBitmap.getWidth(), bHeartBitmap.getHeight());
-
-            piecesBitmap = BitmapFactory.decodeResource(res, R.drawable.chess_pieces);
-            spriteSize = piecesBitmap.getHeight() / 2;
+            Bitmap piecesBitmap = BitmapFactory.decodeResource(res, R.drawable.chess_pieces);
+            int spriteSize = piecesBitmap.getHeight() / 2;
             spriteRect = new Rect(0, 0, spriteSize, spriteSize);
+
+            // get bitmap for pieces
+            int numPiece = 7;
+            wPieceBitmaps = new Bitmap[numPiece];
+            bPieceBitmaps = new Bitmap[numPiece];
+            for (int i = 0; i < numPiece - 1; i ++) {
+                spriteRect.offsetTo(spriteSize * i, 0);
+                wPieceBitmaps[i] = Bitmap.createBitmap(piecesBitmap,
+                        spriteRect.left, spriteRect.top, spriteRect.width(), spriteRect.height());
+                spriteRect.offsetTo(spriteSize * i, spriteSize);
+                bPieceBitmaps[i] = Bitmap.createBitmap(piecesBitmap,
+                        spriteRect.left, spriteRect.top, spriteRect.width(), spriteRect.height());
+            }
+            wPieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.heart_white);
+            bPieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.heart_black);
+            spriteRect.offsetTo(0, 0);
+
+            wrPieceBitmaps = new Bitmap[numPiece];
+            brPieceBitmaps = new Bitmap[numPiece];
+            Matrix rotateMatrix = new Matrix();
+            rotateMatrix.postRotate(180);
+
+            // create rotated bitmap of pieces
+            for (int i = 0; i < numPiece; i++) {
+                wrPieceBitmaps[i] = Bitmap.createBitmap(wPieceBitmaps[i],
+                        0, 0, wPieceBitmaps[i].getWidth(), wPieceBitmaps[i].getHeight(),
+                        rotateMatrix, false);
+                brPieceBitmaps[i] = Bitmap.createBitmap(bPieceBitmaps[i],
+                        0, 0, wPieceBitmaps[i].getWidth(), wPieceBitmaps[i].getHeight(),
+                        rotateMatrix, false);
+            }
+        }
+
+        public void draw(Canvas canvas, Rect dstBlock, Boolean rotate) {
+            Bitmap pieceBitmap;
+            if (value > 1)
+                pieceBitmap = rotate ? wrPieceBitmaps[value-1] : wPieceBitmaps[value-1];
+            else
+                pieceBitmap = rotate ? brPieceBitmaps[-value-1] : bPieceBitmaps[-value-1];
+            canvas.drawBitmap(pieceBitmap, spriteRect, dstBlock, null);
         }
         
         public boolean validMove(Piece[][] board, int xStart, int yStart, int xEnd, int yEnd) {
@@ -58,54 +96,6 @@ public class Chessboard {
 
             return false;
         }
-
-        public void draw(Canvas canvas, Rect dstBlock) {
-            switch (this) {
-                case W_King:
-                    spriteRect.offsetTo(0, 0);
-                    break;
-                case W_Queen:
-                    spriteRect.offsetTo(spriteSize, 0);
-                    break;
-                case W_Bishop:
-                    spriteRect.offsetTo(spriteSize * 2, 0);
-                    break;
-                case W_Knight:
-                    spriteRect.offsetTo(spriteSize * 3, 0);
-                    break;
-                case W_Rook:
-                    spriteRect.offsetTo(spriteSize * 4, 0);
-                    break;
-                case W_Pawn:
-                    spriteRect.offsetTo(spriteSize * 5, 0);
-                    break;
-                case W_Heart:
-                    canvas.drawBitmap(wHeartBitmap, heartRect, dstBlock, null);
-                    return;
-                case B_King:
-                    spriteRect.offsetTo(0, spriteSize);
-                    break;
-                case B_Queen:
-                    spriteRect.offsetTo(spriteSize, spriteSize);
-                    break;
-                case B_Bishop:
-                    spriteRect.offsetTo(spriteSize * 2, spriteSize);
-                    break;
-                case B_Knight:
-                    spriteRect.offsetTo(spriteSize * 3, spriteSize);
-                    break;
-                case B_Rook:
-                    spriteRect.offsetTo(spriteSize * 4, spriteSize);
-                    break;
-                case B_Pawn:
-                    spriteRect.offsetTo(spriteSize * 5, spriteSize);
-                    break;
-                case B_Heart:
-                    canvas.drawBitmap(bHeartBitmap, heartRect, dstBlock, null);
-                    return;
-            }
-            canvas.drawBitmap(piecesBitmap, spriteRect, dstBlock, null);
-        }
     }
 
 
@@ -117,13 +107,13 @@ public class Chessboard {
 
     private final int width;
     private final int height;
-    private Piece[][] board;
+    private final Piece[][] board;
 
     private final View indicatorView;
-    static String winnerTextKey = "winnerTextKey";
+    private final boolean rotatePieces;
 
-    private int[] wPieces = {0, 0};     // {protectees, protectors}
-    private int[] bPieces = {0, 0};
+    private final int[] wPieces = {0, 0};     // {protectees, protectors}
+    private final int[] bPieces = {0, 0};
 
     // for drawing
     private int blockSize;
@@ -146,6 +136,9 @@ public class Chessboard {
         this.height = board.length;
         this.board = board;
         this.indicatorView = indicatorView;
+        this.rotatePieces = PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.rotate_pieces), true);
 
         for (Piece[] row : board) {     // counting pieces
             for (Piece piece : row) {
@@ -183,9 +176,9 @@ public class Chessboard {
                 white = !white;
                 block.offsetTo(x*blockSize, y*blockSize);
                 canvas.drawRect(block, (x == selectedX && y == selectedY) ? selectedPaint :
-                        white ? whitePaint : blackPaint);
-                if (board[y][x] != null)
-                    board[y][x].draw(canvas, block);
+                        white ? whitePaint : blackPaint);   // draw the board
+                if (board[y][x] != null)    // draw a piece
+                    board[y][x].draw(canvas, block, playerToMove != 1 && rotatePieces);
             }
         }
     }
@@ -200,7 +193,9 @@ public class Chessboard {
 
         if (selectedX == -1) {  // nothing selected
             Piece piece = board[y][x];
-            if (piece != null && (playerToMove == 1 && piece.value > 0 || playerToMove == -1 && piece.value < 0)) {  // player to move selects a piece
+            if (piece != null &&
+                    (playerToMove == 1 && piece.value > 0
+                    || playerToMove == -1 && piece.value < 0)) {  // player to move selects a piece
                 selectedX = x;
                 selectedY = y;
             }
@@ -244,16 +239,16 @@ public class Chessboard {
     private void checkGameState() {
         if (wPieces[0] == 0 || wPieces[1] == 0) {
             winner = -1;
-            gameOverDialog("Black Wins");
+            gameOverDialog(context.getString(R.string.black_wins));
         } else if (bPieces[0] == 0 || bPieces[1] == 0) {
             winner = 1;
-            gameOverDialog("White Wins");
+            gameOverDialog(context.getString(R.string.white_wins));
         }
     }
 
     private void gameOverDialog(String text) {
         Intent intent = new Intent(context, GameOverDialogActivity.class);
-        intent.putExtra(winnerTextKey, text);
+        intent.putExtra(context.getString(R.string.winner_text), text);
         context.startActivity(intent);
     }
 

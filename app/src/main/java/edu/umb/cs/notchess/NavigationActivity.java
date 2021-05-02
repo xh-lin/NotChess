@@ -1,5 +1,6 @@
 package edu.umb.cs.notchess;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -27,7 +28,7 @@ public class NavigationActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
 
-        demoCollectionPagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        demoCollectionPagerAdapter = new PagerAdapter(getSupportFragmentManager(), this);
         viewPager = findViewById(R.id.pager);
         viewPager.setAdapter(demoCollectionPagerAdapter);
 
@@ -37,8 +38,11 @@ public class NavigationActivity extends FragmentActivity {
 
 
     public static class PagerAdapter extends FragmentPagerAdapter {
-        public PagerAdapter(FragmentManager fm) {
+        private Context context;
+
+        public PagerAdapter(FragmentManager fm, Context context) {
             super(fm);
+            this.context = context;
         }
 
         @Override
@@ -60,9 +64,9 @@ public class NavigationActivity extends FragmentActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Levels";
+                    return context.getString(R.string.levels);
                 default:
-                    return "Customize";
+                    return context.getString(R.string.customize);
             }
         }
     }

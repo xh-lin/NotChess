@@ -19,13 +19,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SettingsDialogActivity"
-            android:theme="@android:style/Theme.Material.Dialog"
-            android:screenOrientation="portrait"/>
-
-        <activity android:name=".GameOverDialogActivity"
-            android:theme="@android:style/Theme.Material.Dialog"
-            android:screenOrientation="portrait"/>
+        <activity android:name=".SettingsActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity">>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
 
         <activity android:name=".NavigationActivity"
             android:launchMode="singleTask"
@@ -33,6 +34,10 @@
 
         <activity android:name=".LevelActivity"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".GameOverDialogActivity"
+            android:theme="@android:style/Theme.Material.Dialog"
             android:screenOrientation="portrait"/>
 
     </application>
