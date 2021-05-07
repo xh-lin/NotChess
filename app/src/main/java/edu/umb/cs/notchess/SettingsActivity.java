@@ -1,7 +1,6 @@
 package edu.umb.cs.notchess;
 
 import android.os.Bundle;
-
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
@@ -23,7 +22,6 @@ public class SettingsActivity extends AppCompatActivity {
                 .replace(R.id.settingsContainer, new SettingsFragment())
                 .commit();
     }
-
 
 
     public static class SettingsFragment extends PreferenceFragmentCompat {

@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
-
 import androidx.annotation.Nullable;
 
 public class GameOverDialogActivity extends Activity {
@@ -29,7 +28,15 @@ public class GameOverDialogActivity extends Activity {
     public void levelReset(View view) {
         Intent intent = new Intent(this, NavigationActivity.class);
         startActivity(intent);
+
         intent = new Intent(this, LevelActivity.class);
+
+        int level = getIntent().getExtras().getInt(getResources().getString(R.string.level_selected));
+        int aiOption = getIntent().getExtras().getInt(getResources().getString(R.string.ai_option));
+
+        intent.putExtra(this.getString(R.string.level_selected), level);
+        intent.putExtra(this.getString(R.string.ai_option), aiOption);
+
         startActivity(intent);
     }
 }
