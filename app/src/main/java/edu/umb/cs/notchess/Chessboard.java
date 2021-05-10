@@ -117,12 +117,12 @@ public class Chessboard {
             for (Piece piece : row) {
                 if (piece != null) {
                     if (piece.value > 0) {  // White piece
-                        if (piece == Piece.W_King || piece == Piece.W_Heart)
+                        if (piece.isProtectee())
                             wPC[0] += 1;
                         else
                             wPC[1] += 1;
                     } else {                // Black piece
-                        if (piece == Piece.B_King || piece == Piece.B_Heart)
+                        if (piece.isProtectee())
                             bPC[0] += 1;
                         else
                             bPC[1] += 1;
@@ -131,7 +131,7 @@ public class Chessboard {
             }
         }
 
-        return new int[][] {wPC, bPC};
+        return new int[][]{wPC, bPC};
     }
 
     // being called by GameView.onSizeChanged() to get the dimension of the View object
@@ -211,7 +211,7 @@ public class Chessboard {
     }
 
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd) {
-        lastMove = new int[] {xStart, yStart, xEnd, yEnd};
+        lastMove = new int[]{xStart, yStart, xEnd, yEnd};
         moveCount += 1;
         Piece kicked = board[yEnd][xEnd];
         if (kicked != null) {
@@ -282,8 +282,7 @@ public class Chessboard {
                 newBoard[i] = board[i].clone();
             GameState state = new GameState(newBoard, wPieceCount.clone(), bPieceCount.clone(), integers[0]);
             // execute playerAI
-            PlayerAI ai = new PlayerAI();
-            return ai.getMove(state);
+            return PlayerAI.getMove(state);
         }
 
         @Override

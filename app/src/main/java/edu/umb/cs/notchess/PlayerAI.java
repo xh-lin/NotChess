@@ -4,61 +4,56 @@ import android.util.Log;
 import java.util.ArrayList;
 
 public class PlayerAI {
-    static int timeLimit = 3;   // Limit for computer players' thinking time (seconds)
+    static long startTime;
+    static int timeLimit = 3000;   // Limit for computer player's thinking time (milliseconds)
 
+    // for getScore() calculation
     static double victoryPoints = 100;
     static double pointMultiplier = 10;
-    static double pieceValue = 20;
     static double victoryScoreThresh = 900;
 
+    // depth range of iterative deepening
     static int minLookAhead = 2;
     static int maxLookAhead = 6;
 
-//    private int assignedPlayer;
-    private final int boardWidth = 7;
-    private final int boardHeight = 6;
+    static final int boardWidth = 7;
+    static final int boardHeight = 6;
 
-    private long startTime;
-
-//    PlayerAI(int assignedPlayer, Piece[][] board) {
-//        this.assignedPlayer = assignedPlayer;
-//        boardWidth = board[0].length;
-//        boardHeight = board.length;
-//    }
+    static ArrayList<int[]> wProtectees = new ArrayList<>();       // location of Kings and Hearts
+    static ArrayList<int[]> bProtectees = new ArrayList<>();
 
     // Compute list of legal moves for a given GameState and the player moving next
-    private ArrayList<int[]> getMoveOptions(GameState state) {
+    private static ArrayList<int[]> getMoveOptions(GameState state) {
         ArrayList<int[]> moves = new ArrayList<>();
-        Piece tmpPiece;
-        int pieceCount = 0;
+        Piece pieceToMove;
         for (int xStart = 0; xStart < boardWidth; xStart++) {
             for (int yStart = 0; yStart < boardHeight; yStart++) {
-                tmpPiece = state.board[yStart][xStart];
-                if (tmpPiece != null && tmpPiece.belongsTo(state.playerToMove)) {
-                    pieceCount++;
-                    moves.addAll(tmpPiece.getMoveOptions(state.board, xStart, yStart));
-                }
+                pieceToMove = state.board[yStart][xStart];
+                if (pieceToMove != null && pieceToMove.belongsTo(state.playerToMove))
+                    moves.addAll(pieceToMove.getMoveOptions(state.board, xStart, yStart));
             }
         }
-//        Log.d("AI", String.format("getMoveOptions(): p2move %d, pieceCount %d, movesSize %d",
-//                state.playerToMove, pieceCount, moves.size()));
+
         return moves;
     }
 
     // For a given GameState and move to be executed, return the GameState that results from the move
-    private GameState makeMove(GameState state, int[] move) {
+    private static GameState makeMove(GameState state, int[] move) {
         int xStart = move[0];
         int yStart = move[1];
         int xEnd = move[2];
         int yEnd = move[3];
-        Piece[][] newBoard = new Piece[state.board.length][];
+
+        Piece[][] newBoard = new Piece[state.board.length][];           // clone the state
         for (int i = 0; i < state.board.length; i++)
             newBoard[i] = state.board[i].clone();
-        GameState newState = new GameState(newBoard, state.wPieceCount.clone(), state.bPieceCount.clone(), -state.playerToMove);
-        newState.board[yEnd][xEnd] = newState.board[yStart][xStart];
+        GameState newState = new GameState(newBoard, state.wPieceCount.clone(),
+                state.bPieceCount.clone(), -state.playerToMove);
+
+        newState.board[yEnd][xEnd] = newState.board[yStart][xStart];    // move the piece
         newState.board[yStart][xStart] = null;
 
-        Piece kicked = state.board[yEnd][xEnd];
+        Piece kicked = state.board[yEnd][xEnd];                         // count remaining pieces
         if (kicked != null) {
             if (kicked.value > 0) {
                 if (kicked == Piece.W_King || kicked == Piece.W_Heart)
@@ -73,67 +68,93 @@ public class PlayerAI {
             }
         }
 
-        if (newState.wPieceCount[0] == 0 || newState.wPieceCount[1] == 0
+        if (newState.wPieceCount[0] == 0 || newState.wPieceCount[1] == 0    // check whether game over
                 || newState.bPieceCount[0] == 0 || newState.bPieceCount[1] == 0) {
             newState.gameOver = true;
             newState.points = state.playerToMove * victoryPoints;
         }
 
-//        Log.d("AI", String.format("makeMove(): newP2move %d, gameOver %b",
-//                newState.playerToMove, newState.gameOver));
         return newState;
     }
 
-    // Return the evaluation score for a given GameState; higher score indicates a better situation for Player MAX(1).
-    private double getScore(GameState state) {
-        double score = pointMultiplier * state.points;
+    private static void updateProtecteeLocations(Piece[][] board) {
+        boolean protecteesMoved = false;
+        Piece piece;
+        for (int[] location : wProtectees) {
+            piece = board[location[1]][location[0]];
+            if (piece == null || !piece.isProtectee()) {
+                protecteesMoved = true;
+                break;
+            }
+        }
+        if (!protecteesMoved) {
+            for (int[] location : bProtectees) {
+                piece = board[location[1]][location[0]];
+                if (piece == null || !piece.isProtectee()) {
+                    protecteesMoved = true;
+                    break;
+                }
+            }
+        }
+        if (!protecteesMoved)
+            return;
 
-//        Piece[] maxTargetPieces = {Piece.B_King, Piece.B_Heart};
-//        Piece[] minTargetPieces = {Piece.W_King, Piece.W_Heart};
-//        ArrayList<int[]> maxTargetLocations = new ArrayList<>();
-//        ArrayList<int[]> minTargetLocations = new ArrayList<>();
-//
-//        for (int x = 0; x < boardWidth; x++) {
-//            for (int y = 0; y < boardHeight; y++) {
-//                for (Piece target : maxTargetPieces) {
-//                    if (state.board[y][x] == target)
-//                        maxTargetLocations.add(new int[] {x, y});
-//                }
-//                for (Piece target : minTargetPieces) {
-//                    if (state.board[y][x] == target)
-//                        minTargetLocations.add(new int[] {x, y});
-//                }
-//            }
-//        }
-
+        wProtectees.clear();
+        bProtectees.clear();
         for (int x = 0; x < boardWidth; x++) {
             for (int y = 0; y < boardHeight; y++) {
-                if (state.board[y][x] != null) {
-                    if (state.board[y][x].belongsTo(-1)) {
-                        int appleDist = (boardWidth - 1) - x + (boardHeight - 1) - y;
-                        score += pieceValue - appleDist;
-                    } else if (state.board[y][x].belongsTo(1)) {
-                        int appleDist = x + y;
-                        score -= pieceValue - appleDist;
+                piece = board[y][x];
+                if (piece != null && piece.isProtectee())
+                    (piece.belongsTo(1) ? wProtectees : bProtectees).add(new int[]{x, y});
+            }
+        }
+    }
+
+    // Return the evaluation score for a given GameState; higher score indicates a better situation for Player MAX(1).
+    private static double getScore(GameState state) {
+        double score = pointMultiplier * state.points;
+
+        if (state.gameOver)
+            return score;
+
+        updateProtecteeLocations(state.board);
+
+        Piece piece;
+        ArrayList<int[]> targets;
+        int tmpDist;
+        int minDist;
+        for (int x = 0; x < boardWidth; x++) {
+            for (int y = 0; y < boardHeight; y++) {
+                piece = state.board[y][x];
+                if (piece != null) {
+                    minDist = Integer.MAX_VALUE;
+                    targets = piece.belongsTo(1) ? bProtectees : wProtectees;
+
+                    for (int[] location : targets) {
+                        tmpDist = Math.abs(location[0] - x) + Math.abs(location[1] - y);
+                        if (tmpDist < minDist)
+                            minDist = tmpDist;
                     }
+
+                    if (piece.belongsTo(1))
+                        score -= minDist;
+                    else
+                        score += minDist;
                 }
             }
         }
 
-//        Log.d("AI", String.format("getScore(): p2move %d, getScore %.1f",
-//                state.playerToMove, score));
         return score;
     }
 
     // Check whether time limit has been reached
-    private boolean timeOut() {
+    private static boolean timeOut() {
         long duration = System.currentTimeMillis() - startTime;
-//        Log.d("AI", String.format("timeOut(): duration %d", duration));
-        return duration / 1000 >= timeLimit;
+        return duration >= timeLimit;
     }
 
     // Use the MinMax algorithm to look ahead <depthRemaining> moves and return the resulting score
-    private double lookAhead(GameState state, int depthRemaining) {
+    private static double lookAhead(GameState state, int depthRemaining) {
         if (depthRemaining == 0 || state.gameOver)
             return getScore(state);
 
@@ -155,17 +176,15 @@ public class PlayerAI {
 
         }
 
-//        Log.d("AI", String.format("lookAhead(): p2move %d, depthRemain %d,  bestScore %.1f",
-//                state.playerToMove, depthRemaining, bestScore));
         return bestScore;
     }
 
     // Compute the next move to be played; keep updating <favoredMove> until computation finished or time limit reached
-    public int[] getMove(final GameState state) {
-        startTime = System.currentTimeMillis();
-        ArrayList<int[]> moveList = getMoveOptions(state);
-        int[] favoredMove = moveList.get(0);
-        double favoredMoveScore = -9e9 * state.playerToMove;
+    static int[] getMove(final GameState state) {
+        startTime = System.currentTimeMillis();                 // Remember computation start time
+        ArrayList<int[]> moveList = getMoveOptions(state);      // Get the list of possible moves
+        int[] favoredMove = moveList.get(0);                    // Choose first in case run out of time
+        double favoredMoveScore = -9e9 * state.playerToMove;    // Use it to remember the favored move
 
         int[] currBestMove;
         double currBestScore;

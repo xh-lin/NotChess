@@ -143,8 +143,8 @@ public class NavigationActivity extends FragmentActivity {
 
         public PagerAdapter(FragmentManager fm, Context context) {
             super(fm);
-            items = new Fragment[] {new LevelsObjectFragment(), new CustomizeObjectFragment()};
-            titles = new String[] {context.getString(R.string.levels), context.getString(R.string.customize)};
+            items = new Fragment[]{new LevelsObjectFragment(), new CustomizeObjectFragment()};
+            titles = new String[]{context.getString(R.string.levels), context.getString(R.string.customize)};
         }
 
         @NonNull
