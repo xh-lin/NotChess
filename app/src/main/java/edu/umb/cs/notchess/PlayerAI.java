@@ -4,13 +4,10 @@ import android.util.Log;
 import java.util.ArrayList;
 
 public class PlayerAI {
-    static long startTime;
-    static int timeLimit = 3000;   // Limit for computer player's thinking time (milliseconds)
-
     // for getScore() calculation
     static double victoryPoints = 100;
     static double pointMultiplier = 10;
-    static double victoryScoreThresh = 900;
+    static double victoryScoreThresh = victoryPoints * pointMultiplier;
 
     // depth range of iterative deepening
     static int minLookAhead = 2;
@@ -21,6 +18,11 @@ public class PlayerAI {
 
     static ArrayList<int[]> wProtectees = new ArrayList<>();       // location of Kings and Hearts
     static ArrayList<int[]> bProtectees = new ArrayList<>();
+
+    static long startTime;
+    static int timeLimit = 3000;   // Limit for computer player's thinking time (milliseconds)
+
+    static int mPlayer;
 
     // Compute list of legal moves for a given GameState and the player moving next
     private static ArrayList<int[]> getMoveOptions(GameState state) {
@@ -154,26 +156,26 @@ public class PlayerAI {
     }
 
     // Use the MinMax algorithm to look ahead <depthRemaining> moves and return the resulting score
-    private static double lookAhead(GameState state, int depthRemaining) {
+    private static double lookAhead(GameState state, int depthRemaining, double alphaBeta) {
         if (depthRemaining == 0 || state.gameOver)
             return getScore(state);
 
         if (timeOut())
-            return 0;
+            return 9e9 * state.playerToMove;
 
         double bestScore = -9e9 * state.playerToMove;
 
-        GameState projectedState;
-        double score;
-
         for (int[] move : getMoveOptions(state)) {
-            projectedState = makeMove(state, move);
-            score = lookAhead(projectedState, depthRemaining - 1);
+            GameState projectedState = makeMove(state, move);
+            double score = lookAhead(projectedState, depthRemaining - 1, bestScore);
 
             if ((state.playerToMove == 1 && score > bestScore)
                     || (state.playerToMove == -1 && score < bestScore))
                 bestScore = score;
 
+            if ((state.playerToMove == 1 && bestScore > alphaBeta)
+                    || (state.playerToMove == -1 && bestScore < alphaBeta))
+                break;
         }
 
         return bestScore;
@@ -182,38 +184,40 @@ public class PlayerAI {
     // Compute the next move to be played; keep updating <favoredMove> until computation finished or time limit reached
     static int[] getMove(final GameState state) {
         startTime = System.currentTimeMillis();                 // Remember computation start time
+        mPlayer = state.playerToMove;
         ArrayList<int[]> moveList = getMoveOptions(state);      // Get the list of possible moves
         int[] favoredMove = moveList.get(0);                    // Choose first in case run out of time
-        double favoredMoveScore = -9e9 * state.playerToMove;    // Use it to remember the favored move
+        double favoredMoveScore = -9e9 * mPlayer;    // Use it to remember the favored move
 
-        int[] currBestMove;
-        double currBestScore;
-        GameState projectedState;
-        double score;
+        int[] incompleteMove = favoredMove;
+        double incompleteMoveScore = favoredMoveScore;
 
         // Iterative deepening loop
         for (int lookAheadDepth = minLookAhead; lookAheadDepth <= maxLookAhead; lookAheadDepth++) {
-            currBestMove = null;
-            currBestScore = -9e9 * state.playerToMove;
+            int[] currBestMove = null;
+            double currBestScore = -9e9 * mPlayer;
 
             // Try every possible next move, evaluate it using MinMax, and pick the one with best score
             for (int[] move : moveList) {
-                projectedState = makeMove(state, move);
-                score = lookAhead(projectedState, lookAheadDepth - 1);
+                GameState projectedState = makeMove(state, move);
+                double score = lookAhead(projectedState, lookAheadDepth - 1, currBestScore);
+                incompleteMove = move;
+                incompleteMoveScore = score;
 
                 if (timeOut())
                     break;
 
-                if ((state.playerToMove == 1 && score > currBestScore)
-                        || (state.playerToMove == -1 && score < currBestScore)) {
+                if ((mPlayer == 1 && score > currBestScore)
+                        || (mPlayer == -1 && score < currBestScore)) {
                     currBestMove = move;
                     currBestScore = score;
                 }
             }
 
-            if (!timeOut()) {
+            if (!timeOut() && currBestMove != null) {
                 favoredMove = currBestMove;
                 favoredMoveScore = currBestScore;
+
                 long duration = System.currentTimeMillis() - startTime;
                 Log.i("AI", String.format("-- PlayerAI: Depth %d finished at %d ms, favored move (%d,%d)->(%d,%d), score = %.1f",
                         lookAheadDepth, duration, favoredMove[0], favoredMove[1], favoredMove[2], favoredMove[3], favoredMoveScore));
@@ -225,6 +229,6 @@ public class PlayerAI {
                 break;
         }
 
-        return favoredMove;
+        return (favoredMoveScore * mPlayer < 0 && incompleteMoveScore * mPlayer > 0) ? incompleteMove : favoredMove;
     }
 }
