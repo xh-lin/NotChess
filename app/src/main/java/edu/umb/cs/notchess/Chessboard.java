@@ -182,23 +182,17 @@ public class Chessboard {
 
         if (x >= width || y >= height) return;  // clicking outside of the board
 
-        if (selectedX == -1) {  // if nothing selected yet
-            Piece piece = board[y][x];
-            if (piece != null && piece.belongsTo(playerToMove) && playerToMove != ai) {  // player to move selects a piece
-                selectedX = x;
-                selectedY = y;
-                moveList = piece.getMoveOptions(board, x, y);
-            }
-        } else { // if a piece selected already
-            if (selectedX == x && selectedY == y) {  // deselect
-                deselect();
-            } else if (validMove(x, y)) {  // make a move
-                makeMove(selectedX, selectedY, x, y);
-
-
-                if (winner == 0 && playerToMove == ai)
-                    new AIThink().execute(ai);
-            }
+        Piece piece = board[y][x];
+        if (selectedX == x && selectedY == y) { // deselect
+            deselect();
+        } else if (piece != null && piece.belongsTo(playerToMove) && playerToMove != ai) {
+            selectedX = x;  // player selects a piece
+            selectedY = y;
+            moveList = piece.getMoveOptions(board, x, y);
+        } else if (selectedX != -1 && validMove(x, y)) {    // player makes a move
+            makeMove(selectedX, selectedY, x, y);
+            if (winner == 0 && playerToMove == ai)
+                new AIThink().execute(ai);
         }
     }
 
