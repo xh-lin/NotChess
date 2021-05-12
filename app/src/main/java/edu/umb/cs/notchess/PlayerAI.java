@@ -47,7 +47,8 @@ public class PlayerAI {
             for (int yStart = 0; yStart < boardHeight; yStart++) {
                 Piece pieceToMove = state.board[yStart][xStart];
                 if (pieceToMove != null && pieceToMove.belongsTo(state.playerToMove))
-                    moves.addAll(pieceToMove.getMoveOptions(state.board, xStart, yStart));
+                    moves.addAll(pieceToMove.getMoveOptions(state.board, xStart, yStart,
+                            state.isMoved[yStart][xStart]));
             }
         }
 
@@ -67,14 +68,14 @@ public class PlayerAI {
         int xEnd = move[2];
         int yEnd = move[3];
 
-        Piece[][] newBoard = new Piece[state.board.length][];           // clone the state
-        for (int i = 0; i < state.board.length; i++)
-            newBoard[i] = state.board[i].clone();
-        GameState newState = new GameState(newBoard, state.wPieceCount.clone(),
-                state.bPieceCount.clone(), -state.playerToMove);
+        GameState newState = new GameState(state.board, state.isMoved,
+                state.wPieceCount, state.bPieceCount, -state.playerToMove);
 
         newState.board[yEnd][xEnd] = newState.board[yStart][xStart];    // move the piece
         newState.board[yStart][xStart] = null;
+
+        newState.isMoved[yStart][xStart] = true;
+        newState.isMoved[yEnd][xEnd] = true;
 
         Piece kicked = state.board[yEnd][xEnd];                         // count remaining pieces
         if (kicked != null) {

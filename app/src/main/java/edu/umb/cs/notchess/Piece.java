@@ -164,7 +164,7 @@ public enum Piece {
         addSlideMoves(moves, board, xStart, yStart, 1, 0);    // → moves
     }
 
-    public ArrayList<int[]> getMoveOptions(Piece[][] board, int xStart, int yStart) {
+    public ArrayList<int[]> getMoveOptions(Piece[][] board, int xStart, int yStart, boolean isMoved) {
         ArrayList<int[]> moves = new ArrayList<>();
         int xEnd, yEnd;
         Piece target;
@@ -215,10 +215,11 @@ public enum Piece {
             case W_Pawn:
             case B_Pawn:
                 int[][] pawnMoveDir = pawnMoveDirections[getPawnDirection()];
+                int steps = isMoved ? 1 : 2;
 
                 xEnd = xStart;
                 yEnd = yStart;
-                for (int i = 0; i < 2; i++) {   // move forward up to two steps
+                for (int i = 0; i < steps; i++) {   // move forward up to two steps
                     xEnd += pawnMoveDir[0][0];
                     yEnd += pawnMoveDir[0][1];
                     if (withinBoard(board, xEnd, yEnd) && board[yEnd][xEnd] == null) {

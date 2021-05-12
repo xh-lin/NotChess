@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
+import java.util.Set;
 
 public class Chessboard {
     private final Context context;
@@ -25,6 +26,7 @@ public class Chessboard {
     private final int width;
     private final int height;
 
+    private final boolean[][] isMoved;
     private final int[] wPieceCount;    // game over if either is zero: {protectees, protectors}
     private final int[] bPieceCount;    // protectees = King, Heart    protectors = other pieces
 
@@ -54,6 +56,7 @@ public class Chessboard {
     private int ai = 0;                 // 1 -> White, -1 -> Black, 0 -> disable
     private int moveCount = 0;          // for indicatorView to display
 
+
     public Chessboard(Context context, int level, int aiOption, View gameView, TextView indicatorView) {
         this.context = context;
         this.level = level;
@@ -62,17 +65,28 @@ public class Chessboard {
         this.indicatorView = indicatorView;
 
         // load the chess board
-        Piece[][] board = Levels.boards[level];
-        this.board = new Piece[board.length][];
+        Piece[][] board = Levels.boards[level]; // get board by index
+        this.board = new Piece[board.length][]; // clone
         for (int i = 0; i < board.length; i++)
             this.board[i] = board[i].clone();
-        this.width = board[0].length;
+        this.width = board[0].length;           // get dimension
         this.height = board.length;
 
-        // count number of pieces for determining whether game is over
-        int[][] wbPC = countPieces(board);
-        wPieceCount = wbPC[0];
-        bPieceCount = wbPC[1];
+        isMoved = new boolean[height][width];   // default values are false
+
+        // count the number of pieces for determining whether game is over
+        wPieceCount = new int[]{0, 0};     // {protectees, protectors}
+        bPieceCount = new int[]{0, 0};
+        for (Piece[] row : board) {
+            for (Piece piece : row) {
+                if (piece != null) {
+                    if (piece.value > 0)    // a White piece
+                        wPieceCount[piece.isProtectee() ? 0 : 1] += 1;
+                    else                    // a Black piece
+                        bPieceCount[piece.isProtectee() ? 0 : 1] += 1;
+                }
+            }
+        }
 
         // playerAI option
         switch (aiOption) {
@@ -91,7 +105,7 @@ public class Chessboard {
         this.selectedPaint = new Paint();
         this.selectedPaint.setColor(ContextCompat.getColor(context, R.color.light_yellow));
 
-        // rotate pieces setting
+        // load rotate pieces setting
         this.rotatePieces = PreferenceManager
                 .getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(R.string.rotate_pieces), true);
@@ -107,31 +121,6 @@ public class Chessboard {
         // execute playerAI if it is the first to move
         if (ai == playerToMove)
             new AIThink().execute(ai);
-    }
-
-    int[][] countPieces(Piece[][] board) {
-        int[] wPC = {0, 0};     // {protectees, protectors}
-        int[] bPC = {0, 0};
-
-        for (Piece[] row : board) {
-            for (Piece piece : row) {
-                if (piece != null) {
-                    if (piece.value > 0) {  // White piece
-                        if (piece.isProtectee())
-                            wPC[0] += 1;
-                        else
-                            wPC[1] += 1;
-                    } else {                // Black piece
-                        if (piece.isProtectee())
-                            bPC[0] += 1;
-                        else
-                            bPC[1] += 1;
-                    }
-                }
-            }
-        }
-
-        return new int[][]{wPC, bPC};
     }
 
     // being called by GameView.onSizeChanged() to get the dimension of the View object
@@ -188,7 +177,7 @@ public class Chessboard {
         } else if (piece != null && piece.belongsTo(playerToMove) && playerToMove != ai) {
             selectedX = x;  // player selects a piece
             selectedY = y;
-            moveList = piece.getMoveOptions(board, x, y);
+            moveList = piece.getMoveOptions(board, x, y, isMoved[y][x]);
         } else if (selectedX != -1 && validMove(x, y)) {    // player makes a move
             makeMove(selectedX, selectedY, x, y);
             if (winner == 0 && playerToMove == ai)
@@ -207,6 +196,9 @@ public class Chessboard {
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd) {
         lastMove = new int[]{xStart, yStart, xEnd, yEnd};
         moveCount += 1;
+        isMoved[yStart][xStart] = true;
+        isMoved[yEnd][xEnd] = true;
+
         Piece kicked = board[yEnd][xEnd];
         if (kicked != null) {
             if (kicked.value > 0) {
@@ -271,10 +263,7 @@ public class Chessboard {
         @Override
         protected int[] doInBackground(Integer... integers) {
             // preparing information for PlayerAI
-            Piece[][] newBoard = new Piece[board.length][];
-            for (int i = 0; i < board.length; i++)
-                newBoard[i] = board[i].clone();
-            GameState state = new GameState(newBoard, wPieceCount.clone(), bPieceCount.clone(), integers[0]);
+            GameState state = new GameState(board, isMoved, wPieceCount, bPieceCount, integers[0]);
             // execute playerAI
             return PlayerAI.getMove(state);
         }
