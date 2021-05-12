@@ -109,6 +109,14 @@ public enum Piece {
         return x >= 0 && x < board[0].length && y >= 0 && y < board.length;
     }
 
+    public boolean setPawnDirection(int direction) {
+        if ((this == W_Pawn || this == B_Pawn) && direction >= 0 && direction <= 3) {
+            pawnDirection = direction;
+            return true;
+        }
+        return false;
+    }
+
     private int getPawnDirection() {
         if (pawnDirection == -1) {  // return default value
             if (this == W_Pawn)
@@ -119,12 +127,8 @@ public enum Piece {
         return pawnDirection;       // returns -1 of not a pawn
     }
 
-    public boolean setPawnDirection(int direction) {
-        if ((this == W_Pawn || this == B_Pawn) && direction >= 0 && direction <= 3) {
-            pawnDirection = direction;
-            return true;
-        }
-        return false;
+    public int[] getPawnsForward() {
+        return pawnMoveDirections[getPawnDirection()][0].clone();
     }
 
     private void addSlideMoves(ArrayList<int[]> moves, Piece[][] board,
@@ -164,7 +168,8 @@ public enum Piece {
         addSlideMoves(moves, board, xStart, yStart, 1, 0);    // → moves
     }
 
-    public ArrayList<int[]> getMoveOptions(Piece[][] board, int xStart, int yStart, boolean isMoved) {
+    public ArrayList<int[]> getMoveOptions(Piece[][] board, int xStart, int yStart, boolean isMoved,
+                                           int[] lastMove) {
         ArrayList<int[]> moves = new ArrayList<>();
         int xEnd, yEnd;
         Piece target;
@@ -214,12 +219,13 @@ public enum Piece {
 
             case W_Pawn:
             case B_Pawn:
-                int[][] pawnMoveDir = pawnMoveDirections[getPawnDirection()];
-                int steps = isMoved ? 1 : 2;
+                final int TWO_STEPS = 2;        // a pawn can move two steps in the beginning
+                int steps = isMoved ? 1 : TWO_STEPS;
+                int[][] pawnMoveDir = pawnMoveDirections[getPawnDirection()];   // {move, kick1, kick2}
 
                 xEnd = xStart;
                 yEnd = yStart;
-                for (int i = 0; i < steps; i++) {   // move forward up to two steps
+                for (int i = 0; i < steps; i++) {   // move forward
                     xEnd += pawnMoveDir[0][0];
                     yEnd += pawnMoveDir[0][1];
                     if (withinBoard(board, xEnd, yEnd) && board[yEnd][xEnd] == null) {
@@ -236,6 +242,36 @@ public enum Piece {
                         target = board[yEnd][xEnd];
                         if (target != null && notFriendlyWith(target))
                             moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                    }
+
+                    // special move: en passant (in passing)
+                    if (lastMove != null) {
+                        int xSide = xEnd - pawnMoveDir[0][0];
+                        int ySide = yEnd - pawnMoveDir[0][1];
+                        int xLastStart = lastMove[0];
+                        int yLastStart = lastMove[1];
+                        int xLastEnd = lastMove[2];
+                        int yLastEnd = lastMove[3];
+
+                        // if opponent's last move moved a piece to this pawn's side ...
+                        if (xSide == xLastEnd && ySide == yLastEnd) {
+                            Piece lastMovedPiece = board[yLastEnd][xLastEnd];
+                            // ... and that was a pawn ...
+                            if (lastMovedPiece == W_Pawn || lastMovedPiece == B_Pawn) {
+                                int lastMoveSteps = Math.abs(xLastEnd - xLastStart) + Math.abs(yLastEnd - yLastStart);
+                                // ... and that pawn moved two steps ...
+                                if (lastMoveSteps == TWO_STEPS) {
+                                    // opposite direction of last move
+                                    int xLastOpDir = (xLastStart - xLastEnd) / TWO_STEPS;
+                                    int yLastOpDir = (yLastStart - yLastEnd) / TWO_STEPS;
+                                    // ... and that pawn moves in a opposite direction of this pawn ...
+                                    if (xLastOpDir == pawnMoveDir[0][0] && yLastOpDir == pawnMoveDir[0][1]) {
+                                        // ... then this pawn can capture that passing pawn
+                                        moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
         }

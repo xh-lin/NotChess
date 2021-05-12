@@ -4,6 +4,7 @@ import android.util.Log;
 import androidx.core.math.MathUtils;
 import java.util.ArrayList;
 import java.util.Collections;
+import static edu.umb.cs.notchess.Piece.*;
 
 public class PlayerAI {
     // for getScore() calculation
@@ -11,7 +12,7 @@ public class PlayerAI {
     static double victoryScoreThresh = victoryPoints - 1;
 
     // depth range of iterative deepening
-    static int minLookAhead = 3;
+    static int minLookAhead = 2;
     static int maxLookAhead = 20;
 
     static int boardWidth;
@@ -48,7 +49,7 @@ public class PlayerAI {
                 Piece pieceToMove = state.board[yStart][xStart];
                 if (pieceToMove != null && pieceToMove.belongsTo(state.playerToMove))
                     moves.addAll(pieceToMove.getMoveOptions(state.board, xStart, yStart,
-                            state.isMoved[yStart][xStart]));
+                            state.isMoved[yStart][xStart], state.lastMove));
             }
         }
 
@@ -69,30 +70,41 @@ public class PlayerAI {
         int yEnd = move[3];
 
         GameState newState = new GameState(state.board, state.isMoved,
-                state.wPieceCount, state.bPieceCount, -state.playerToMove);
+                state.wPieceCount, state.bPieceCount, move.clone(), -state.playerToMove);
 
-        newState.board[yEnd][xEnd] = newState.board[yStart][xStart];    // move the piece
+        Piece toMove = newState.board[yStart][xStart];
+        Piece kicked = newState.board[yEnd][xEnd];
+
+        // make the move
+        newState.board[yEnd][xEnd] = toMove;
         newState.board[yStart][xStart] = null;
 
         newState.isMoved[yStart][xStart] = true;
         newState.isMoved[yEnd][xEnd] = true;
 
-        Piece kicked = state.board[yEnd][xEnd];                         // count remaining pieces
-        if (kicked != null) {
-            if (kicked.value > 0) {
-                if (kicked == Piece.W_King || kicked == Piece.W_Heart)
-                    newState.wPieceCount[0] -= 1;
-                else
-                    newState.wPieceCount[1] -= 1;
-            } else {
-                if (kicked == Piece.B_King || kicked == Piece.B_Heart)
-                    newState.bPieceCount[0] -= 1;
-                else
-                    newState.bPieceCount[1] -= 1;
+        // special move: en passant (in passing)
+        if (kicked == null && (toMove == W_Pawn || toMove == B_Pawn)) {
+            int[] pawnsForward = toMove.getPawnsForward();
+            int xBehind = xEnd - pawnsForward[0];
+            int yBehind = yEnd - pawnsForward[1];
+            Piece pieceBehind = newState.board[yBehind][xBehind];
+            if (pieceBehind == W_Pawn || pieceBehind == B_Pawn) {   // if it was en passant move
+                kicked = pieceBehind;
+                newState.board[yBehind][xBehind] = null;
             }
         }
 
-        if (newState.wPieceCount[0] == 0 || newState.wPieceCount[1] == 0    // check whether game over
+        // count the number of pieces left
+        if (kicked != null) {
+            if (kicked.value > 0) {
+                newState.wPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
+            } else {
+                newState.bPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
+            }
+        }
+
+        // check whether game over
+        if (newState.wPieceCount[0] == 0 || newState.wPieceCount[1] == 0
                 || newState.bPieceCount[0] == 0 || newState.bPieceCount[1] == 0) {
             newState.gameOver = true;
             newState.points = state.playerToMove * victoryPoints;
@@ -131,16 +143,17 @@ public class PlayerAI {
 
     // Return the evaluation score for a given GameState; higher score indicates a better situation for Player MAX(1).
     private static double getScore(GameState state) {
+        double score = state.points;
+
         if (state.gameOver)
-            return state.points;
+            return score;
 
-        updateProtecteeLocations(state.board);
-
-        double score = 0;
         Piece piece;
         ArrayList<int[]> targets;
         int tmpDist;
         int minDist;
+
+        updateProtecteeLocations(state.board);
 
         for (int x = 0; x < boardWidth; x++) {
             for (int y = 0; y < boardHeight; y++) {

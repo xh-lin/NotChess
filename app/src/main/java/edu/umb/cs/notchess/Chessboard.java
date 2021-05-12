@@ -9,11 +9,12 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
-import java.util.Set;
+import static edu.umb.cs.notchess.Piece.*;
 
 public class Chessboard {
     private final Context context;
@@ -177,8 +178,8 @@ public class Chessboard {
         } else if (piece != null && piece.belongsTo(playerToMove) && playerToMove != ai) {
             selectedX = x;  // player selects a piece
             selectedY = y;
-            moveList = piece.getMoveOptions(board, x, y, isMoved[y][x]);
-        } else if (selectedX != -1 && validMove(x, y)) {    // player makes a move
+            moveList = piece.getMoveOptions(board, x, y, isMoved[y][x], lastMove);
+        } else if (validMove(x, y)) {    // player makes a move
             makeMove(selectedX, selectedY, x, y);
             if (winner == 0 && playerToMove == ai)
                 new AIThink().execute(ai);
@@ -186,6 +187,8 @@ public class Chessboard {
     }
 
     private boolean validMove(int xEnd, int yEnd) {
+        if (moveList == null || moveList.size() == 0)
+            return false;
         for (int[] move : moveList) {
             if (xEnd == move[2] && yEnd == move[3])
                 return true;
@@ -194,33 +197,48 @@ public class Chessboard {
     }
 
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd) {
+        // update game state information
         lastMove = new int[]{xStart, yStart, xEnd, yEnd};
         moveCount += 1;
+
+        Piece toMove = board[yStart][xStart];
+        Piece kicked = board[yEnd][xEnd];
+
+        // make the move
+        board[yEnd][xEnd] = toMove;
+        board[yStart][xStart] = null;
+
         isMoved[yStart][xStart] = true;
         isMoved[yEnd][xEnd] = true;
 
-        Piece kicked = board[yEnd][xEnd];
-        if (kicked != null) {
-            if (kicked.value > 0) {
-                if (kicked == Piece.W_King || kicked == Piece.W_Heart)
-                    wPieceCount[0] -= 1;
-                else
-                    wPieceCount[1] -= 1;
-            } else {
-                if (kicked == Piece.B_King || kicked == Piece.B_Heart)
-                    bPieceCount[0] -= 1;
-                else
-                    bPieceCount[1] -= 1;
+        // special move: en passant (in passing)
+        if (kicked == null && (toMove == W_Pawn || toMove == B_Pawn)) {
+            int[] pawnsForward = toMove.getPawnsForward();
+            int xBehind = xEnd - pawnsForward[0];
+            int yBehind = yEnd - pawnsForward[1];
+            Piece pieceBehind = board[yBehind][xBehind];
+            if (pieceBehind == W_Pawn || pieceBehind == B_Pawn) {   // if it was en passant move
+                kicked = pieceBehind;
+                board[yBehind][xBehind] = null;
             }
         }
 
-        board[yEnd][xEnd] = board[yStart][xStart];
-        board[yStart][xStart] = null;
-        playerToMove = -playerToMove;     // opponent is the next player to move
+        // count the number of pieces left
+        if (kicked != null) {
+            if (kicked.value > 0) {
+                wPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
+            } else {
+                bPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
+            }
+        }
+
+        playerToMove = -playerToMove;       // opponent is the next player to move
         deselect();
 
-        updateMoveIndicator();
-        checkGameState();
+        updateMoveIndicator();              // update text of telling who's move next
+        checkGameState();                   // check whether game is over
+
+        Log.i("AI", String.format("wPC: %d %d\nbPC: %d %d", wPieceCount[0], wPieceCount[1], bPieceCount[0], bPieceCount[1]));
     }
 
     private void deselect() {
@@ -263,7 +281,8 @@ public class Chessboard {
         @Override
         protected int[] doInBackground(Integer... integers) {
             // preparing information for PlayerAI
-            GameState state = new GameState(board, isMoved, wPieceCount, bPieceCount, integers[0]);
+            GameState state = new GameState(board, isMoved, wPieceCount, bPieceCount, lastMove,
+                    integers[0]);
             // execute playerAI
             return PlayerAI.getMove(state);
         }
