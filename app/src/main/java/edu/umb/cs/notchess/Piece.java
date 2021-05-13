@@ -43,38 +43,42 @@ public enum Piece {
     /* drawing */
 
     static void loadAssets(final Resources res) {
-        Bitmap piecesBitmap = BitmapFactory.decodeResource(res, R.drawable.chess_pieces);
-        int spriteSize = piecesBitmap.getHeight() / 2;
-        spriteRect = new Rect(0, 0, spriteSize, spriteSize);
-
-        // get bitmaps for each piece
+        // load bitmaps for each piece
         int numPiece = 7;
         wPieceBitmaps = new Bitmap[numPiece];
         bPieceBitmaps = new Bitmap[numPiece];
-        for (int i = 0; i < numPiece - 1; i ++) {
-            spriteRect.offsetTo(spriteSize * i, 0);
-            wPieceBitmaps[i] = Bitmap.createBitmap(piecesBitmap,
-                    spriteRect.left, spriteRect.top, spriteRect.width(), spriteRect.height());
-            spriteRect.offsetTo(spriteSize * i, spriteSize);
-            bPieceBitmaps[i] = Bitmap.createBitmap(piecesBitmap,
-                    spriteRect.left, spriteRect.top, spriteRect.width(), spriteRect.height());
-        }
-        wPieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.heart_white);
-        bPieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.heart_black);
-        spriteRect.offsetTo(0, 0);  // reset for later use
+
+        wPieceBitmaps[0] = BitmapFactory.decodeResource(res, R.drawable.w_king);
+        wPieceBitmaps[1] = BitmapFactory.decodeResource(res, R.drawable.w_queen);
+        wPieceBitmaps[2] = BitmapFactory.decodeResource(res, R.drawable.w_bishop);
+        wPieceBitmaps[3] = BitmapFactory.decodeResource(res, R.drawable.w_knight);
+        wPieceBitmaps[4] = BitmapFactory.decodeResource(res, R.drawable.w_rook);
+        wPieceBitmaps[5] = BitmapFactory.decodeResource(res, R.drawable.w_pawn);
+        wPieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.w_heart);
+
+        bPieceBitmaps[0] = BitmapFactory.decodeResource(res, R.drawable.b_king);
+        bPieceBitmaps[1] = BitmapFactory.decodeResource(res, R.drawable.b_queen);
+        bPieceBitmaps[2] = BitmapFactory.decodeResource(res, R.drawable.b_bishop);
+        bPieceBitmaps[3] = BitmapFactory.decodeResource(res, R.drawable.b_knight);
+        bPieceBitmaps[4] = BitmapFactory.decodeResource(res, R.drawable.b_rook);
+        bPieceBitmaps[5] = BitmapFactory.decodeResource(res, R.drawable.b_pawn);
+        bPieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.b_heart);
 
         wRotatePieceBitmaps = new Bitmap[numPiece];
         bRotatePieceBitmaps = new Bitmap[numPiece];
         Matrix rotateMatrix = new Matrix();
         rotateMatrix.postRotate(180);
 
+        int spriteSize = wPieceBitmaps[0].getWidth();
+        spriteRect = new Rect(0, 0, spriteSize, spriteSize);
+
         // create rotated bitmap of pieces
         for (int i = 0; i < numPiece; i++) {
             wRotatePieceBitmaps[i] = Bitmap.createBitmap(wPieceBitmaps[i],
-                    0, 0, spriteRect.width(), spriteRect.height(),
+                    0, 0, spriteSize, spriteSize,
                     rotateMatrix, false);
             bRotatePieceBitmaps[i] = Bitmap.createBitmap(bPieceBitmaps[i],
-                    0, 0, spriteRect.width(), spriteRect.height(),
+                    0, 0, spriteSize, spriteSize,
                     rotateMatrix, false);
         }
     }
@@ -276,18 +280,6 @@ public enum Piece {
     public boolean belongsTo(int player) {
         return (value > 0 && player == 1) || (value < 0 && player == -1);
     }
-
-//    public boolean isProtectee() {
-//        switch (this) {
-//            case W_King:
-//            case W_Heart:
-//            case B_King:
-//            case B_Heart:
-//                return true;
-//            default:
-//                return false;
-//        }
-//    }
 
     public boolean isKing() {
         return this == W_King || this == B_King;

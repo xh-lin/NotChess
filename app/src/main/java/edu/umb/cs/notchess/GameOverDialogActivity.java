@@ -13,7 +13,7 @@ public class GameOverDialogActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_dialog_game_over);
+        setContentView(R.layout.dialog_game_over);
 
         Intent intent = getIntent();
         String winnerText = intent.getStringExtra(getString(R.string.winner_text));
