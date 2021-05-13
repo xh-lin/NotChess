@@ -13,7 +13,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         getSupportActionBar().hide();
-
     }
 
     public void gameStartActivity(View view) {

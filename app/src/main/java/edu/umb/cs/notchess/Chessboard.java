@@ -17,40 +17,38 @@ import java.util.ArrayList;
 import static edu.umb.cs.notchess.Piece.*;
 
 public class Chessboard {
-    private final Context context;
+    private final Context context;          // context of GameView
     private final int level;                // index of Levels.boards
-    private final int aiOption;             // 0 -> disable, 1 -> Black, 2 -> White
-    private final View gameView;            // the view to draw the board
-    private final TextView indicatorView;   // showing who's move now
-
-    private final int width;
-    private final int height;
-
-    // for drawing
-
-    private final Paint whitePaint;
-    private final Paint blackPaint;
-    private final Paint selectedPaint;
-
-    private int blockSize;
-    private Rect block;                 // for drawing each block of the board
-    private final boolean rotatePieces; // rotate pieces option from the setting
-
-    private final Bitmap moveBitmap;
-    private final Bitmap kickBitmap;
-    private final Rect spriteRect;      // for drawing moveBitmap and kickBitmap
-
-    // for making moves
-
-    private int selectedX = -1;         // piece currently selected by human player
-    private int selectedY = -1;
-    private ArrayList<int[]> moveList;  // move options of currently selected piece
-
-    private int ai = 0;                 // 1 -> White, -1 -> Black, 0 -> disable
-    private int moveCount = 0;          // for indicatorView to display
+    private final int aiOption;             // spinner items: 0 -> disable, 1 -> Black, 2 -> White
+    private final View gameView;            // the GameView object that draws the chess board
+    private final TextView indicatorView;   // for showing who is the player to move now
 
     private final GameState state;
+    private final int width;                // dimension of the chess board
+    private final int height;
 
+    /* for drawing */
+
+    private final Paint whitePaint;         // paints for the board
+    private final Paint blackPaint;
+    private final Paint selectedPaint;      // the paint for highlights
+
+    private int blockSize;                  // width/height of a block
+    private Rect block;                     // used for drawing each block of the board
+    private final boolean rotatePieces;     // rotate pieces option from the setting
+
+    private final Bitmap moveBitmap;        // for showing move options
+    private final Bitmap kickBitmap;        // for showing move options to kick a piece
+    private final Rect spriteRect;          // for drawing moveBitmap and kickBitmap
+
+    /* for making moves */
+
+    private int selectedX = -1;             // piece coordinate currently selected by human player
+    private int selectedY = -1;
+    private ArrayList<int[]> moveList;      // move options of currently selected piece
+
+    private int ai = 0;                     // 1 -> White, -1 -> Black, 0 -> disable
+    private int moveCount = 0;              // for indicatorView to display
 
     public Chessboard(Context context, int level, int aiOption, View gameView, TextView indicatorView) {
         this.context = context;
@@ -119,6 +117,9 @@ public class Chessboard {
             new AIThink().execute(ai);
     }
 
+    /*============================================================================================*/
+    /* drawing */
+
     // being called by GameView.onSizeChanged() to get the dimension of the View object
     public void resize(int w, int h) {
         int newBlockSize = Math.min(w/width, h/height);
@@ -157,6 +158,9 @@ public class Chessboard {
             }
         }
     }
+
+    /*============================================================================================*/
+    /* making moves */
 
     // handles player action of selecting and making moves
     public void select(float xPix, float yPix) {
@@ -204,6 +208,9 @@ public class Chessboard {
         moveList = null;
     }
 
+    /*============================================================================================*/
+    /* UI */
+
     private void updateMoveIndicator() {
         int id;
         if (state.playerToMove == 1)
@@ -239,7 +246,8 @@ public class Chessboard {
         context.startActivity(intent);
     }
 
-
+    /*============================================================================================*/
+    /* AI */
 
     private class AIThink extends AsyncTask<Integer, Void, int[]> {
         @Override

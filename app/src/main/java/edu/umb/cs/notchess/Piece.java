@@ -15,12 +15,12 @@ public enum Piece {
     B_Knight(-4), B_Rook(-5), B_Pawn(-6), B_Heart(-7);
 
     public final int value;
-    private int pawnDirection = -1;
+    private int pawnDirection = -1;             // 0: up, 1: down, 2: left, 3: right
 
-    static Rect spriteRect;
-    static Bitmap[] wPieceBitmaps;
+    static Rect spriteRect;                     // for drawing a sprite
+    static Bitmap[] wPieceBitmaps;              // containing sprites
     static Bitmap[] bPieceBitmaps;
-    static Bitmap[] wRotatePieceBitmaps;
+    static Bitmap[] wRotatePieceBitmaps;        // containing sprites rotated 180 degrees
     static Bitmap[] bRotatePieceBitmaps;
 
     private final int[][] kingMoveDirections = {{-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0},
@@ -38,6 +38,9 @@ public enum Piece {
     Piece(int value) {
         this.value = value;
     }
+
+    /*============================================================================================*/
+    /* drawing */
 
     static void loadAssets(final Resources res) {
         Bitmap piecesBitmap = BitmapFactory.decodeResource(res, R.drawable.chess_pieces);
@@ -85,6 +88,9 @@ public enum Piece {
         canvas.drawBitmap(pieceBitmap, spriteRect, dstBlock, null);
     }
 
+    /*============================================================================================*/
+    /* utils */
+
     public boolean belongsTo(int player) {
         return (value > 0 && player == 1) || (value < 0 && player == -1);
     }
@@ -109,12 +115,15 @@ public enum Piece {
         return x >= 0 && x < board[0].length && y >= 0 && y < board.length;
     }
 
+    /*============================================================================================*/
+    /* get move options */
+
     public boolean setPawnDirection(int direction) {
         if ((this == W_Pawn || this == B_Pawn) && direction >= 0 && direction <= 3) {
             pawnDirection = direction;
             return true;
         }
-        return false;
+        return false;   // returns false if this is not a pawn or invalid input
     }
 
     private int getPawnDirection() {

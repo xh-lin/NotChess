@@ -5,10 +5,10 @@ import static edu.umb.cs.notchess.Piece.W_Pawn;
 
 // for PlayerAI to do calculations
 public class GameState {
-    public final Piece[][] board;
-    public final boolean[][] isMoved;
-    public final int[] wPieceCount;     // {protectees, protectors}
-    public final int[] bPieceCount;
+    public final Piece[][] board;       // representation of the chess board
+    public final boolean[][] isMoved;   // whether a piece has visited or move away from a block
+    public final int[] wPieceCount;     // for determining whether the game is over ...
+    public final int[] bPieceCount;     // ... {protectees, protectors}, protectees: Kings/Hearts
     public int[] lastMove;              // {xStart, yStart, xEnd, yEnd}
     public int playerToMove;            // 1 -> White, -1 -> Black
     public int winner;                  // 1 -> White, -1 -> Black, 0 -> game not over

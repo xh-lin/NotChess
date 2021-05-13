@@ -56,6 +56,8 @@ public class NavigationActivity extends FragmentActivity {
         this.aiOption = aiOption;
     }
 
+    /*============================================================================================*/
+    /* PagerAdapter */
 
     public static class LevelsObjectFragment extends Fragment {
         int level = -1;
@@ -73,6 +75,7 @@ public class NavigationActivity extends FragmentActivity {
             startLevelButton = rootView.findViewById(R.id.start_level);
             startLevelButton.setEnabled(false);
 
+            // drop down option for the computer player
             Spinner aiOption = rootView.findViewById(R.id.ai_option);
             aiOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -85,15 +88,18 @@ public class NavigationActivity extends FragmentActivity {
                 }
             });
 
+            // load titles of each level
             int levelCount = Levels.titles.length;
             String[] levels = new String[levelCount];
             for (int i = 0; i < levelCount; i++)
                 levels[i] = String.valueOf(i+1);
 
+            // add buttons for level option
             ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), R.layout.list_item_level, levels);
             GridView gridView = rootView.findViewById(R.id.gridView);
             gridView.setAdapter(adapter);
 
+            // handle selecting level buttons
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {

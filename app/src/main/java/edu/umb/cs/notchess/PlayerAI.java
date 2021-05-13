@@ -15,17 +15,52 @@ public class PlayerAI {
     static int minLookAhead = 2;
     static int maxLookAhead = 20;
 
+    // chess board dimension
     static int boardWidth;
     static int boardHeight;
 
-    static ArrayList<int[]> wProtectees;       // location of Kings and Hearts
+    // location of Kings and Hearts, used for score calculation
+    static ArrayList<int[]> wProtectees;
     static ArrayList<int[]> bProtectees;
 
-    static int mPlayer;
-    static long startTime;
-    static int timeLimit = 3000;   // Limit for computer player's thinking time (milliseconds)
+    static int mPlayer;             // computer player is White(1) or Black(0)
+    static long startTime;          // for remembering when the program has started
+    static int timeLimit = 3000;    // Think time limit of computer player (milliseconds)
 
+    /*============================================================================================*/
+    /* helper functions */
 
+    // whether Kings have moved
+    private static boolean needUpdateProtecteeLocations(Piece[][] board, ArrayList<int[]> protectees) {
+        if (protectees.size() == 0)             // first time calling
+            return true;
+        Piece piece;
+        for (int[] location : protectees) {     // pieces moved
+            piece = board[location[1]][location[0]];
+            if (piece == null || !piece.isProtectee())
+                return true;
+        }
+        return false;
+    }
+
+    // get new coordinates of Kings
+    private static void updateProtecteeLocations(Piece[][] board) {
+        if (needUpdateProtecteeLocations(board, wProtectees)
+                || needUpdateProtecteeLocations(board, bProtectees)) {
+            Piece piece;
+            wProtectees.clear();
+            bProtectees.clear();
+            for (int x = 0; x < boardWidth; x++) {
+                for (int y = 0; y < boardHeight; y++) {
+                    piece = board[y][x];
+                    if (piece != null && piece.isProtectee())
+                        (piece.belongsTo(1) ? wProtectees : bProtectees).add(new int[]{x, y});
+                }
+            }
+        }
+    }
+
+    // get the distance between a piece and the closest King/Heart
     private static int moveDistFromTargets(int player, int[] move) {
         ArrayList<int[]> targets = (player == 1) ? bProtectees : wProtectees;
         int xEnd = move[2];
@@ -39,6 +74,9 @@ public class PlayerAI {
         }
         return minDist;
     }
+
+    /*============================================================================================*/
+    /* algorithm to get a move */
 
     // Compute list of legal moves for a given GameState and the player moving next
     private static ArrayList<int[]> getMoveOptions(GameState state) {
@@ -79,33 +117,6 @@ public class PlayerAI {
         return newState;
     }
 
-    private static boolean needUpdateProtecteeLocations(Piece[][] board, ArrayList<int[]> protectees) {
-        if (protectees.size() == 0)             // first time calling
-            return true;
-        Piece piece;
-        for (int[] location : protectees) {     // pieces moved
-            piece = board[location[1]][location[0]];
-            if (piece == null || !piece.isProtectee())
-                return true;
-        }
-        return false;
-    }
-
-    private static void updateProtecteeLocations(Piece[][] board) {
-        if (needUpdateProtecteeLocations(board, wProtectees)
-                || needUpdateProtecteeLocations(board, bProtectees)) {
-            Piece piece;
-            wProtectees.clear();
-            bProtectees.clear();
-            for (int x = 0; x < boardWidth; x++) {
-                for (int y = 0; y < boardHeight; y++) {
-                    piece = board[y][x];
-                    if (piece != null && piece.isProtectee())
-                        (piece.belongsTo(1) ? wProtectees : bProtectees).add(new int[]{x, y});
-                }
-            }
-        }
-    }
 
     // Return the evaluation score for a given GameState; higher score indicates a better situation for Player MAX(1).
     private static double getScore(GameState state) {
