@@ -64,49 +64,15 @@ public class PlayerAI {
 
     // For a given GameState and move to be executed, return the GameState that results from the move
     private static GameState makeMove(GameState state, int[] move) {
-        int xStart = move[0];
-        int yStart = move[1];
-        int xEnd = move[2];
-        int yEnd = move[3];
-
-        GameState newState = new GameState(state.board, state.isMoved,
-                state.wPieceCount, state.bPieceCount, move.clone(), -state.playerToMove);
-
-        Piece toMove = newState.board[yStart][xStart];
-        Piece kicked = newState.board[yEnd][xEnd];
-
-        // make the move
-        newState.board[yEnd][xEnd] = toMove;
-        newState.board[yStart][xStart] = null;
-
-        newState.isMoved[yStart][xStart] = true;
-        newState.isMoved[yEnd][xEnd] = true;
-
-        // special move: en passant (in passing)
-        if (kicked == null && (toMove == W_Pawn || toMove == B_Pawn)) {
-            int[] pawnsForward = toMove.getPawnsForward();
-            int xBehind = xEnd - pawnsForward[0];
-            int yBehind = yEnd - pawnsForward[1];
-            Piece pieceBehind = newState.board[yBehind][xBehind];
-            if (pieceBehind == W_Pawn || pieceBehind == B_Pawn) {   // if it was en passant move
-                kicked = pieceBehind;
-                newState.board[yBehind][xBehind] = null;
-            }
-        }
-
-        // count the number of pieces left
-        if (kicked != null) {
-            if (kicked.value > 0) {
-                newState.wPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
-            } else {
-                newState.bPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
-            }
-        }
+        GameState newState = state.clone();
+        newState.makeMove(move[0], move[1], move[2], move[3]);
 
         // check whether game over
-        if (newState.wPieceCount[0] == 0 || newState.wPieceCount[1] == 0
-                || newState.bPieceCount[0] == 0 || newState.bPieceCount[1] == 0) {
-            newState.gameOver = true;
+        if (newState.wPieceCount[0] == 0 || newState.wPieceCount[1] == 0) {
+            newState.winner = -1;
+            newState.points = state.playerToMove * victoryPoints;
+        } else if (newState.bPieceCount[0] == 0 || newState.bPieceCount[1] == 0) {
+            newState.winner = 1;
             newState.points = state.playerToMove * victoryPoints;
         }
 
@@ -145,7 +111,7 @@ public class PlayerAI {
     private static double getScore(GameState state) {
         double score = state.points;
 
-        if (state.gameOver)
+        if (state.isGameOver())
             return score;
 
         Piece piece;
@@ -187,7 +153,7 @@ public class PlayerAI {
 
     // Use the MinMax algorithm to look ahead <depthRemaining> moves and return the resulting score
     private static double lookAhead(GameState state, int depthRemaining, double alphaBeta) {
-        if (depthRemaining == 0 || state.gameOver)
+        if (depthRemaining == 0 || state.isGameOver())
             return getScore(state);
 
         if (timeOut())

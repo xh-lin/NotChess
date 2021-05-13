@@ -23,13 +23,8 @@ public class Chessboard {
     private final View gameView;            // the view to draw the board
     private final TextView indicatorView;   // showing who's move now
 
-    private final Piece[][] board;
     private final int width;
     private final int height;
-
-    private final boolean[][] isMoved;
-    private final int[] wPieceCount;    // game over if either is zero: {protectees, protectors}
-    private final int[] bPieceCount;    // protectees = King, Heart    protectors = other pieces
 
     // for drawing
 
@@ -44,7 +39,6 @@ public class Chessboard {
     private final Bitmap moveBitmap;
     private final Bitmap kickBitmap;
     private final Rect spriteRect;      // for drawing moveBitmap and kickBitmap
-    private int[] lastMove;             // {xStart, yStart, xEnd, yEnd}
 
     // for making moves
 
@@ -52,10 +46,10 @@ public class Chessboard {
     private int selectedY = -1;
     private ArrayList<int[]> moveList;  // move options of currently selected piece
 
-    private int playerToMove = 1;       // 1 -> White, -1 -> Black
-    private int winner = 0;             // 1 -> White, -1 -> Black, 0 -> game not over
     private int ai = 0;                 // 1 -> White, -1 -> Black, 0 -> disable
     private int moveCount = 0;          // for indicatorView to display
+
+    private final GameState state;
 
 
     public Chessboard(Context context, int level, int aiOption, View gameView, TextView indicatorView) {
@@ -67,17 +61,15 @@ public class Chessboard {
 
         // load the chess board
         Piece[][] board = Levels.boards[level]; // get board by index
-        this.board = new Piece[board.length][]; // clone
-        for (int i = 0; i < board.length; i++)
-            this.board[i] = board[i].clone();
+
         this.width = board[0].length;           // get dimension
         this.height = board.length;
 
-        isMoved = new boolean[height][width];   // default values are false
+        boolean[][] isMoved = new boolean[height][width];   // default values are false
 
         // count the number of pieces for determining whether game is over
-        wPieceCount = new int[]{0, 0};     // {protectees, protectors}
-        bPieceCount = new int[]{0, 0};
+        int[] wPieceCount = new int[]{0, 0};     // {protectees, protectors}
+        int[] bPieceCount = new int[]{0, 0};
         for (Piece[] row : board) {
             for (Piece piece : row) {
                 if (piece != null) {
@@ -88,6 +80,9 @@ public class Chessboard {
                 }
             }
         }
+
+        state = new GameState(board, isMoved, wPieceCount, bPieceCount, null,
+                1);
 
         // playerAI option
         switch (aiOption) {
@@ -120,7 +115,7 @@ public class Chessboard {
         updateMoveIndicator();
 
         // execute playerAI if it is the first to move
-        if (ai == playerToMove)
+        if (ai == state.playerToMove)
             new AIThink().execute(ai);
     }
 
@@ -142,13 +137,13 @@ public class Chessboard {
                 canvas.drawRect(block, white ? whitePaint : blackPaint);
                 // draw highlights for selected and last move
                 if (selectedX == x && selectedY == y
-                        || lastMove != null && (lastMove[0] == x && lastMove[1] == y
-                        || lastMove[2] == x && lastMove[3] == y))
+                        || state.lastMove != null && (state.lastMove[0] == x && state.lastMove[1] == y
+                        || state.lastMove[2] == x && state.lastMove[3] == y))
                     canvas.drawRect(block, selectedPaint);
                 // draw a piece
-                Piece piece = board[y][x];
+                Piece piece = state.board[y][x];
                 if (piece != null)
-                    piece.draw(canvas, block, playerToMove == -1 && rotatePieces && ai == 0);
+                    piece.draw(canvas, block, state.playerToMove == -1 && rotatePieces && ai == 0);
             }
         }
         // draw move options
@@ -157,7 +152,7 @@ public class Chessboard {
                 int xEnd = move[2];
                 int yEnd = move[3];
                 block.offsetTo(blockSize * xEnd, blockSize * yEnd);
-                canvas.drawBitmap(board[yEnd][xEnd] == null ? moveBitmap : kickBitmap,
+                canvas.drawBitmap(state.board[yEnd][xEnd] == null ? moveBitmap : kickBitmap,
                         spriteRect, block, null);
             }
         }
@@ -165,24 +160,24 @@ public class Chessboard {
 
     // handles player action of selecting and making moves
     public void select(float xPix, float yPix) {
-        if (winner != 0) checkGameState();  // game is already over
+        if (state.isGameOver()) checkGameState();  // game is already over
 
         int x = (int) xPix / blockSize;     // clicked on which block
         int y = (int) yPix / blockSize;
 
         if (x >= width || y >= height) return;  // clicking outside of the board
 
-        Piece piece = board[y][x];
+        Piece piece = state.board[y][x];
         if (selectedX == x && selectedY == y) { // deselect
             deselect();
-        } else if (piece != null && piece.belongsTo(playerToMove) && playerToMove != ai) {
+        } else if (piece != null && piece.belongsTo(state.playerToMove) && state.playerToMove != ai) {
             selectedX = x;  // player selects a piece
             selectedY = y;
-            moveList = piece.getMoveOptions(board, x, y, isMoved[y][x], lastMove);
+            moveList = piece.getMoveOptions(state.board, x, y, state.isMoved[y][x], state.lastMove);
         } else if (validMove(x, y)) {    // player makes a move
             makeMove(selectedX, selectedY, x, y);
-            if (winner == 0 && playerToMove == ai)
-                new AIThink().execute(ai);
+            if (!state.isGameOver() && state.playerToMove == ai)
+                new AIThink().execute();
         }
     }
 
@@ -197,48 +192,11 @@ public class Chessboard {
     }
 
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd) {
-        // update game state information
-        lastMove = new int[]{xStart, yStart, xEnd, yEnd};
+        state.makeMove(xStart, yStart, xEnd, yEnd);
         moveCount += 1;
-
-        Piece toMove = board[yStart][xStart];
-        Piece kicked = board[yEnd][xEnd];
-
-        // make the move
-        board[yEnd][xEnd] = toMove;
-        board[yStart][xStart] = null;
-
-        isMoved[yStart][xStart] = true;
-        isMoved[yEnd][xEnd] = true;
-
-        // special move: en passant (in passing)
-        if (kicked == null && (toMove == W_Pawn || toMove == B_Pawn)) {
-            int[] pawnsForward = toMove.getPawnsForward();
-            int xBehind = xEnd - pawnsForward[0];
-            int yBehind = yEnd - pawnsForward[1];
-            Piece pieceBehind = board[yBehind][xBehind];
-            if (pieceBehind == W_Pawn || pieceBehind == B_Pawn) {   // if it was en passant move
-                kicked = pieceBehind;
-                board[yBehind][xBehind] = null;
-            }
-        }
-
-        // count the number of pieces left
-        if (kicked != null) {
-            if (kicked.value > 0) {
-                wPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
-            } else {
-                bPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
-            }
-        }
-
-        playerToMove = -playerToMove;       // opponent is the next player to move
         deselect();
-
         updateMoveIndicator();              // update text of telling who's move next
         checkGameState();                   // check whether game is over
-
-        Log.i("AI", String.format("wPC: %d %d\nbPC: %d %d", wPieceCount[0], wPieceCount[1], bPieceCount[0], bPieceCount[1]));
     }
 
     private void deselect() {
@@ -248,7 +206,7 @@ public class Chessboard {
 
     private void updateMoveIndicator() {
         int id;
-        if (playerToMove == 1)
+        if (state.playerToMove == 1)
             id = ai == 1 ? R.string.white_is_thinking : R.string.whites_move;
         else
             id = ai == -1 ? R.string.black_is_thinking : R.string.blacks_move;
@@ -258,11 +216,17 @@ public class Chessboard {
 
     // check whether game is over
     private void checkGameState() {
-        if (wPieceCount[0] == 0 || wPieceCount[1] == 0) {
-            winner = -1;
+        // check whether game is already over
+        if (state.winner == -1)
             gameOverDialog(context.getString(R.string.black_wins));
-        } else if (bPieceCount[0] == 0 || bPieceCount[1] == 0) {
-            winner = 1;
+        else if (state.winner == 1)
+            gameOverDialog(context.getString(R.string.white_wins));
+
+        if (state.wPieceCount[0] == 0 || state.wPieceCount[1] == 0) {
+            state.winner = -1;
+            gameOverDialog(context.getString(R.string.black_wins));
+        } else if (state.bPieceCount[0] == 0 || state.bPieceCount[1] == 0) {
+            state.winner = 1;
             gameOverDialog(context.getString(R.string.white_wins));
         }
     }
@@ -280,11 +244,8 @@ public class Chessboard {
     private class AIThink extends AsyncTask<Integer, Void, int[]> {
         @Override
         protected int[] doInBackground(Integer... integers) {
-            // preparing information for PlayerAI
-            GameState state = new GameState(board, isMoved, wPieceCount, bPieceCount, lastMove,
-                    integers[0]);
             // execute playerAI
-            return PlayerAI.getMove(state);
+            return PlayerAI.getMove(state.clone());
         }
 
         @Override
