@@ -66,21 +66,19 @@ public class Chessboard {
         boolean[][] isMoved = new boolean[height][width];   // default values are false
 
         // count the number of pieces for determining whether game is over
-        int[] wPieceCount = new int[]{0, 0};     // {protectees, protectors}
-        int[] bPieceCount = new int[]{0, 0};
+        int[] wPieceCount = new int[]{0, 0, 0};     // {Hearts, Kings, others}
+        int[] bPieceCount = new int[]{0, 0, 0};
         for (Piece[] row : board) {
             for (Piece piece : row) {
                 if (piece != null) {
-                    if (piece.value > 0)    // a White piece
-                        wPieceCount[piece.isProtectee() ? 0 : 1] += 1;
-                    else                    // a Black piece
-                        bPieceCount[piece.isProtectee() ? 0 : 1] += 1;
+                    int idx = piece.isHeart() ? 0 : piece.isKing() ? 1 : 2;
+                    if (piece.belongsTo(1)) wPieceCount[idx] += 1;
+                    else bPieceCount[idx] += 1;
                 }
             }
         }
 
-        state = new GameState(board, isMoved, wPieceCount, bPieceCount, null,
-                1);
+        state = new GameState(board, isMoved, wPieceCount, bPieceCount, null, 1);
 
         // playerAI option
         switch (aiOption) {
@@ -223,18 +221,12 @@ public class Chessboard {
 
     // check whether game is over
     private void checkGameState() {
-        // check whether game is already over
-        if (state.winner == -1)
-            gameOverDialog(context.getString(R.string.black_wins));
-        else if (state.winner == 1)
-            gameOverDialog(context.getString(R.string.white_wins));
-
-        if (state.wPieceCount[0] == 0 || state.wPieceCount[1] == 0) {
-            state.winner = -1;
-            gameOverDialog(context.getString(R.string.black_wins));
-        } else if (state.bPieceCount[0] == 0 || state.bPieceCount[1] == 0) {
-            state.winner = 1;
-            gameOverDialog(context.getString(R.string.white_wins));
+        switch (state.checkWinner()) {
+            case 1:
+                gameOverDialog(context.getString(R.string.white_wins));
+                break;
+            case -1:
+                gameOverDialog(context.getString(R.string.black_wins));
         }
     }
 

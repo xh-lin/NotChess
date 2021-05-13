@@ -37,7 +37,7 @@ public class PlayerAI {
         Piece piece;
         for (int[] location : protectees) {     // pieces moved
             piece = board[location[1]][location[0]];
-            if (piece == null || !piece.isProtectee())
+            if (piece == null || !(piece.isHeart() || piece.isKing()))
                 return true;
         }
         return false;
@@ -53,7 +53,7 @@ public class PlayerAI {
             for (int x = 0; x < boardWidth; x++) {
                 for (int y = 0; y < boardHeight; y++) {
                     piece = board[y][x];
-                    if (piece != null && piece.isProtectee())
+                    if (piece != null && (piece.isHeart() || piece.isKing()))
                         (piece.belongsTo(1) ? wProtectees : bProtectees).add(new int[]{x, y});
                 }
             }
@@ -105,14 +105,8 @@ public class PlayerAI {
         GameState newState = state.clone();
         newState.makeMove(move[0], move[1], move[2], move[3]);
 
-        // check whether game over
-        if (newState.wPieceCount[0] == 0 || newState.wPieceCount[1] == 0) {
-            newState.winner = -1;
+        if (newState.checkWinner() != 0)
             newState.points = state.playerToMove * victoryPoints;
-        } else if (newState.bPieceCount[0] == 0 || newState.bPieceCount[1] == 0) {
-            newState.winner = 1;
-            newState.points = state.playerToMove * victoryPoints;
-        }
 
         return newState;
     }

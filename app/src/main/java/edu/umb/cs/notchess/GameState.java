@@ -8,7 +8,7 @@ public class GameState {
     public final Piece[][] board;       // representation of the chess board
     public final boolean[][] isMoved;   // whether a piece has visited or move away from a block
     public final int[] wPieceCount;     // for determining whether the game is over ...
-    public final int[] bPieceCount;     // ... {protectees, protectors}, protectees: Kings/Hearts
+    public final int[] bPieceCount;     // ... {Hearts, Kings, others}
     public int[] lastMove;              // {xStart, yStart, xEnd, yEnd}
     public int playerToMove;            // 1 -> White, -1 -> Black
     public int winner;                  // 1 -> White, -1 -> Black, 0 -> game not over
@@ -36,6 +36,17 @@ public class GameState {
 
     public boolean isGameOver() {
         return winner != 0;
+    }
+
+    public int checkWinner() {
+        if (winner != 0)
+            return winner;
+        if (wPieceCount[1] == 0 && (wPieceCount[0] == 0 || wPieceCount[2] == 0)) {
+            winner = -1;
+        } else if (bPieceCount[1] == 0 && (bPieceCount[0] == 0 || bPieceCount[2] == 0)) {
+            winner = 1;
+        }
+        return winner;
     }
 
     public GameState clone() {
@@ -69,8 +80,9 @@ public class GameState {
 
         // count the number of pieces left
         if (kicked != null) {
-            if (kicked.value > 0) wPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
-            else bPieceCount[kicked.isProtectee() ? 0 : 1] -= 1;
+            int idx = kicked.isHeart() ? 0 : kicked.isKing() ? 1 : 2;
+            if (kicked.belongsTo(1)) wPieceCount[idx] -= 1;
+            else bPieceCount[idx] -= 1;
         }
 
         playerToMove = -playerToMove;   // opponent is the next player to move

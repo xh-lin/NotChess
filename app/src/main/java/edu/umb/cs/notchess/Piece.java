@@ -89,35 +89,9 @@ public enum Piece {
     }
 
     /*============================================================================================*/
-    /* utils */
-
-    public boolean belongsTo(int player) {
-        return (value > 0 && player == 1) || (value < 0 && player == -1);
-    }
-
-    public boolean isProtectee() {
-        switch (this) {
-            case W_King:
-            case W_Heart:
-            case B_King:
-            case B_Heart:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private boolean notFriendlyWith(Piece target) {
-        return (value > 0 && target.value < 0) || (value < 0 && target.value > 0);
-    }
-
-    private boolean withinBoard(Piece[][] board, int x, int y) {
-        return x >= 0 && x < board[0].length && y >= 0 && y < board.length;
-    }
-
-    /*============================================================================================*/
     /* get move options */
 
+    // set the moving direction of W_Pawn or B_Pawn
     public boolean setPawnDirection(int direction) {
         if ((this == W_Pawn || this == B_Pawn) && direction >= 0 && direction <= 3) {
             pawnDirection = direction;
@@ -286,5 +260,60 @@ public enum Piece {
         }
 
         return moves;
+    }
+
+    /*============================================================================================*/
+    /* utils */
+
+    private boolean notFriendlyWith(Piece target) {
+        return (value > 0 && target.value < 0) || (value < 0 && target.value > 0);
+    }
+
+    private boolean withinBoard(Piece[][] board, int x, int y) {
+        return x >= 0 && x < board[0].length && y >= 0 && y < board.length;
+    }
+
+    public boolean belongsTo(int player) {
+        return (value > 0 && player == 1) || (value < 0 && player == -1);
+    }
+
+//    public boolean isProtectee() {
+//        switch (this) {
+//            case W_King:
+//            case W_Heart:
+//            case B_King:
+//            case B_Heart:
+//                return true;
+//            default:
+//                return false;
+//        }
+//    }
+
+    public boolean isKing() {
+        return this == W_King || this == B_King;
+    }
+
+    public boolean isQueen() {
+        return this == W_Queen || this == B_Queen;
+    }
+
+    public boolean isBishop() {
+        return this == W_Bishop || this == B_Bishop;
+    }
+
+    public boolean isKnight() {
+        return this == W_Knight || this == B_Knight;
+    }
+
+    public boolean isRook() {
+        return this == W_Rook || this == B_Rook;
+    }
+
+    public boolean isPawn() {
+        return this == W_Pawn || this == B_Pawn;
+    }
+
+    public boolean isHeart() {
+        return this == W_Heart || this == B_Heart;
     }
 }
