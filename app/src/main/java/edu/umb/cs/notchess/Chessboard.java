@@ -178,7 +178,7 @@ public class Chessboard {
         // draw move options
         if (moveList != null) {
             for (int[] move : moveList) {
-                if (move[4] == -1 || move[4] == 0) {    // avoid drawing promotion multiple times
+                if (move[4] <= 0) {    // avoid drawing promotion multiple times
                     int xEnd = move[2];
                     int yEnd = move[3];
                     block.offsetTo(blockSize * xEnd, blockSize * yEnd);
