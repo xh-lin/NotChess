@@ -22,6 +22,7 @@ public class GameState {
     public int[] lastMove;              // {xStart, yStart, xEnd, yEnd}
     public int playerToMove;            // 1 -> White, -1 -> Black
     public int winner;                  // 1 -> White, -1 -> Black, 0 -> game not over
+    public int moveCount;               // number of moves made
     public double points;               // used for AI's MinMax algorithm
 
     GameState(Piece[][] board, boolean[][] isMoved, int[] wPieceCount, int[] bPieceCount,
@@ -41,6 +42,7 @@ public class GameState {
         this.lastMove = lastMove == null ? null : lastMove.clone();
         this.playerToMove = playerToMove;
         winner = 0;
+        moveCount = 0;
         points = 0;
     }
 
@@ -117,5 +119,6 @@ public class GameState {
         }
 
         playerToMove = -playerToMove;   // opponent is the next player to move
+        moveCount += 1;
     }
 }

@@ -19,12 +19,11 @@ import java.util.ArrayList;
 
 public class Chessboard {
     private final Context context;          // context of GameView
-    private final int level;                // index of Levels.boards
-    private final int aiOption;             // spinner items: 0 -> disable, 1 -> Black, 2 -> White
     private final View gameView;            // the GameView object that draws the chess board
     private final TextView indicatorView;   // for showing who is the player to move now
     
-    private final GameState state;
+    private GameState state;
+    private final GameState initState;       // initial game state for reset
     private final int width;                // dimension of the chess board
     private final int height;
 
@@ -49,18 +48,20 @@ public class Chessboard {
     private ArrayList<int[]> moveList;      // move options of currently selected piece
 
     private int ai = 0;                     // 1 -> White, -1 -> Black, 0 -> disable
-    private int moveCount = 0;              // for indicatorView to display
 
+    private int[] promoteMove;
     private final View wPromotionView;          // for promotion
     private final View bPromotionView;
-    private int[] promoteMove;
+
+    private final View gameOverView;
 
     public Chessboard(Context context, View gameView) {
         LevelActivity levelActivity = ((LevelActivity) context);
+        int level = levelActivity.level;        // index of Levels.boards
+        int aiOption = levelActivity.aiOption;  // spinner items: 0 -> disable, 1 -> Black, 2 -> White
+
         this.context = context;
         this.gameView = gameView;
-        level = levelActivity.level;
-        aiOption = levelActivity.aiOption;
         indicatorView = levelActivity.findViewById(R.id.indicatorView);
 
         // load View objects for pawn promotion
@@ -76,8 +77,13 @@ public class Chessboard {
         mainLayout.addView(bPromotionView, mainLayout.getLayoutParams());
         bPromotionView.setVisibility(View.INVISIBLE);
 
-        // load the chess board
-        Piece[][] board = Levels.boards[level]; // get board by index
+        // load View object for the game over dialog
+        gameOverView = layoutInflater.inflate(R.layout.window_game_over, null);
+        mainLayout.addView(gameOverView, mainLayout.getLayoutParams());
+        gameOverView.setVisibility(View.INVISIBLE);
+
+        // preparing the game state
+        Piece[][] board = Levels.boards[level]; // load the chess board by index
 
         width = board[0].length;           // get dimension
         height = board.length;
@@ -98,6 +104,7 @@ public class Chessboard {
         }
 
         state = new GameState(board, isMoved, wPieceCount, bPieceCount, null, 1);
+        initState = state.clone();
 
         // playerAI option
         switch (aiOption) {
@@ -129,9 +136,8 @@ public class Chessboard {
         Piece.loadAssets(context.getResources());   // load drawables for Piece
         updateMoveIndicator();
 
-        // execute playerAI if it is the first to move
         if (ai == state.playerToMove)
-            new AIThink().execute(ai);
+            new AIThink().execute(ai);      // execute playerAI if it is the first to move
     }
 
     /*============================================================================================*/
@@ -190,12 +196,12 @@ public class Chessboard {
 
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
         state.makeMove(xStart, yStart, xEnd, yEnd, promote);
-        moveCount += 1;
         deselect();
         updateMoveIndicator();              // update text of telling who's move next
         checkGameState();                   // check whether game is over
+
         if (!state.isGameOver() && state.playerToMove == ai)
-            new AIThink().execute();
+            new AIThink().execute();        // execute playerAI if it is the next to move
     }
 
     private boolean isValidMove(int xEnd, int yEnd) {
@@ -245,40 +251,46 @@ public class Chessboard {
     /*============================================================================================*/
     /* UI */
 
-    private void updateMoveIndicator() {
-        int id;
-        if (state.playerToMove == 1)
-            id = ai == 1 ? R.string.white_is_thinking : R.string.whites_move;
-        else
-            id = ai == -1 ? R.string.black_is_thinking : R.string.blacks_move;
-        String text = String.format(context.getResources().getString(id), moveCount);
-        indicatorView.setText(text);
+    public void resetState() {
+        state = initState.clone();
+        state.playerToMove = 1;
+        gameView.invalidate();
+        updateMoveIndicator();
+
+        if (ai == state.playerToMove)
+            new AIThink().execute(ai);  // execute playerAI if it is the first to move
     }
 
-    private void gameOverDialog(String text) {
-        Intent intent = new Intent(context, GameOverDialogActivity.class);
-        intent.putExtra(context.getString(R.string.winner_text), text);
-        intent.putExtra(context.getString(R.string.level_selected), level);
-        intent.putExtra(context.getString(R.string.ai_option), aiOption);
-        context.startActivity(intent);
+    private void showGameOverDialog(String text) {
+        gameOverView.bringToFront();
+        gameOverView.setVisibility(View.VISIBLE);
     }
 
     // check whether game is over
     private void checkGameState() {
         switch (state.checkWinner()) {
             case 1:
-                gameOverDialog(context.getString(R.string.white_wins));
+                showGameOverDialog(context.getString(R.string.white_wins));
                 break;
             case -1:
-                gameOverDialog(context.getString(R.string.black_wins));
+                showGameOverDialog(context.getString(R.string.black_wins));
         }
+    }
+
+    private void updateMoveIndicator() {
+        int id;
+        if (state.playerToMove == 1)
+            id = ai == 1 ? R.string.white_is_thinking : R.string.whites_move;
+        else
+            id = ai == -1 ? R.string.black_is_thinking : R.string.blacks_move;
+        String text = String.format(context.getResources().getString(id), state.moveCount);
+        indicatorView.setText(text);
     }
 
     private void showPromotionView() {
         View promotionView = state.playerToMove == 1 ? wPromotionView : bPromotionView;
         promotionView.bringToFront();
         promotionView.setVisibility(View.VISIBLE);
-
     }
 
     /*============================================================================================*/

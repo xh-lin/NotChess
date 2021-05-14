@@ -22,7 +22,7 @@
         <activity android:name=".SettingsActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:parentActivityName=".MainActivity">>
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
@@ -34,10 +34,6 @@
 
         <activity android:name=".LevelActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"/>
-
-        <activity android:name=".GameOverDialogActivity"
-            android:theme="@android:style/Theme.Material.Dialog"
             android:screenOrientation="portrait"/>
 
     </application>

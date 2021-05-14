@@ -47,4 +47,13 @@ public class LevelActivity extends Activity {
         int promote = Integer.parseInt(view.getTag().toString());
         chessBoardView.mChessboard.makePromotionMove(promote);
     }
+
+    public void resetBoard(View view) {
+        chessBoardView.mChessboard.resetState();
+        ((View) view.getParent().getParent()).setVisibility(View.INVISIBLE);    // hide dialog
+    }
+
+    public void closeActivity(View view) {
+        finish();
+    }
 }
