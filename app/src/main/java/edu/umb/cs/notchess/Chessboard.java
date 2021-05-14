@@ -174,14 +174,17 @@ public class Chessboard {
                     piece.draw(canvas, block, isNeedRotate());
             }
         }
+
         // draw move options
         if (moveList != null) {
             for (int[] move : moveList) {
-                int xEnd = move[2];
-                int yEnd = move[3];
-                block.offsetTo(blockSize * xEnd, blockSize * yEnd);
-                canvas.drawBitmap(state.board[yEnd][xEnd] == null ? moveBitmap : kickBitmap,
-                        spriteRect, block, null);
+                if (move[4] == -1 || move[4] == 0) {    // avoid drawing promotion multiple times
+                    int xEnd = move[2];
+                    int yEnd = move[3];
+                    block.offsetTo(blockSize * xEnd, blockSize * yEnd);
+                    canvas.drawBitmap(state.board[yEnd][xEnd] == null ? moveBitmap : kickBitmap,
+                            spriteRect, block, null);
+                }
             }
         }
     }
@@ -306,7 +309,7 @@ public class Chessboard {
         @Override
         protected void onPostExecute(int[] move) {
             super.onPostExecute(move);
-            makeMove(move[0], move[1], move[2], move[3], -1);
+            makeMove(move[0], move[1], move[2], move[3], move[4]);
             gameView.invalidate();  // update canvas
         }
     }

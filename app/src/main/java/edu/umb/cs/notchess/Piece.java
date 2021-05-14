@@ -127,11 +127,11 @@ public enum Piece {
         while (isWithinBoard(board, xEnd, yEnd)) {
             target = board[yEnd][xEnd];
             if (target == null) {
-                moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                 xEnd += dx;
                 yEnd += dy;
             } else if (isNotFriendlyWith(target)) {
-                moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                 break;
             } else {    // blocked by a friendly piece
                 break;
@@ -155,6 +155,18 @@ public enum Piece {
         addSlideMoves(moves, board, xStart, yStart, 1, 0);    // → moves
     }
 
+    // check for promotion before adding a move
+    private void addPawnMoves(ArrayList<int[]> moves, Piece[][] board,
+                              int xStart, int yStart, int xEnd, int yEnd) {
+        if (isPromotion(board, xEnd, yEnd)) {       // add move for each the promotion option
+            for (int promote = 0; promote <= 3; promote++)
+                moves.add(new int[]{xStart, yStart, xEnd, yEnd, promote});
+        } else {
+            moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
+        }
+    }
+
+    // returns an array list of int array: {xStart, yStart, xEnd, yEnd, promote}
     public ArrayList<int[]> getMoveOptions(Piece[][] board, int xStart, int yStart, boolean isMoved,
                                            int[] lastMove) {
         ArrayList<int[]> moves = new ArrayList<>();
@@ -170,7 +182,7 @@ public enum Piece {
                     if (isWithinBoard(board, xEnd, yEnd)) {
                         target = board[yEnd][xEnd];
                         if (target == null || isNotFriendlyWith(target))
-                            moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                            moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                     }
                 }
                 break;
@@ -194,7 +206,7 @@ public enum Piece {
                     if (isWithinBoard(board, xEnd, yEnd)) {
                         target = board[yEnd][xEnd];
                         if (target == null || isNotFriendlyWith(target))
-                            moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                            moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                     }
                 }
                 break;
@@ -216,7 +228,7 @@ public enum Piece {
                     xEnd += pawnMoveDir[0][0];
                     yEnd += pawnMoveDir[0][1];
                     if (isWithinBoard(board, xEnd, yEnd) && board[yEnd][xEnd] == null) {
-                        moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                        addPawnMoves(moves, board, xStart, yStart, xEnd, yEnd);
                     } else {
                         break;
                     }
@@ -228,7 +240,7 @@ public enum Piece {
                     if (isWithinBoard(board, xEnd, yEnd)) {
                         target = board[yEnd][xEnd];
                         if (target != null && isNotFriendlyWith(target))
-                            moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                            addPawnMoves(moves, board, xStart, yStart, xEnd, yEnd);
                     }
 
                     // special move: en passant (in passing)
@@ -254,7 +266,7 @@ public enum Piece {
                                     // ... and that pawn moves in a opposite direction of this pawn ...
                                     if (xLastOpDir == pawnMoveDir[0][0] && yLastOpDir == pawnMoveDir[0][1]) {
                                         // ... then this pawn can capture that passing pawn
-                                        moves.add(new int[]{xStart, yStart, xEnd, yEnd});
+                                        addPawnMoves(moves, board, xStart, yStart, xEnd, yEnd);
                                     }
                                 }
                             }
