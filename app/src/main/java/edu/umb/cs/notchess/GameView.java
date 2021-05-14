@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 
 public class GameView extends View {
-    private final Chessboard mChessboard;
+    public final Chessboard mChessboard;
 
     public GameView(Context context) {
         super(context);

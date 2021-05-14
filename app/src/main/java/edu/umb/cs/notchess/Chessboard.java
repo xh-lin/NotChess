@@ -10,8 +10,11 @@ import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import static edu.umb.cs.notchess.Piece.*;
@@ -22,7 +25,7 @@ public class Chessboard {
     private final int aiOption;             // spinner items: 0 -> disable, 1 -> Black, 2 -> White
     private final View gameView;            // the GameView object that draws the chess board
     private final TextView indicatorView;   // for showing who is the player to move now
-
+    
     private final GameState state;
     private final int width;                // dimension of the chess board
     private final int height;
@@ -50,19 +53,36 @@ public class Chessboard {
     private int ai = 0;                     // 1 -> White, -1 -> Black, 0 -> disable
     private int moveCount = 0;              // for indicatorView to display
 
+    private final View wPromotionView;          // for promotion
+    private final View bPromotionView;
+    private int[] promoteMove;
+
     public Chessboard(Context context, View gameView) {
         LevelActivity levelActivity = ((LevelActivity) context);
         this.context = context;
-        this.level = levelActivity.level;
-        this.aiOption = levelActivity.aiOption;
         this.gameView = gameView;
-        this.indicatorView = levelActivity.findViewById(R.id.indicatorView);
+        level = levelActivity.level;
+        aiOption = levelActivity.aiOption;
+        indicatorView = levelActivity.findViewById(R.id.indicatorView);
+
+        // load View objects for pawn promotion
+        LayoutInflater layoutInflater;
+        layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ConstraintLayout mainLayout = levelActivity.findViewById(R.id.constrainLayout);
+
+        wPromotionView = layoutInflater.inflate(R.layout.promotion_white, null);
+        mainLayout.addView(wPromotionView, mainLayout.getLayoutParams());
+        wPromotionView.setVisibility(View.INVISIBLE);
+
+        bPromotionView = layoutInflater.inflate(R.layout.promotion_black, null);
+        mainLayout.addView(bPromotionView, mainLayout.getLayoutParams());
+        bPromotionView.setVisibility(View.INVISIBLE);
 
         // load the chess board
-        Piece[][] board = Levels.boards[this.level]; // get board by index
+        Piece[][] board = Levels.boards[level]; // get board by index
 
-        this.width = board[0].length;           // get dimension
-        this.height = board.length;
+        width = board[0].length;           // get dimension
+        height = board.length;
 
         boolean[][] isMoved = new boolean[height][width];   // default values are false
 
@@ -73,7 +93,7 @@ public class Chessboard {
             for (Piece piece : row) {
                 if (piece != null) {
                     int idx = piece.isHeart() ? 0 : piece.isKing() ? 1 : 2;
-                    if (piece.belongsTo(1)) wPieceCount[idx] += 1;
+                    if (piece.isBelongingTo(1)) wPieceCount[idx] += 1;
                     else bPieceCount[idx] += 1;
                 }
             }
@@ -82,31 +102,31 @@ public class Chessboard {
         state = new GameState(board, isMoved, wPieceCount, bPieceCount, null, 1);
 
         // playerAI option
-        switch (this.aiOption) {
+        switch (aiOption) {
             case 1: // Black
-                this.ai = -1;
+                ai = -1;
                 break;
             case 2: // White
-                this.ai = 1;
+                ai = 1;
         }
 
         // paints
-        this.whitePaint = new Paint();
-        this.whitePaint.setColor(ContextCompat.getColor(context, R.color.beige));
-        this.blackPaint = new Paint();
-        this.blackPaint.setColor(ContextCompat.getColor(context, R.color.brown));
-        this.selectedPaint = new Paint();
-        this.selectedPaint.setColor(ContextCompat.getColor(context, R.color.light_yellow));
+        whitePaint = new Paint();
+        whitePaint.setColor(ContextCompat.getColor(context, R.color.beige));
+        blackPaint = new Paint();
+        blackPaint.setColor(ContextCompat.getColor(context, R.color.brown));
+        selectedPaint = new Paint();
+        selectedPaint.setColor(ContextCompat.getColor(context, R.color.light_yellow));
 
         // load rotate pieces setting
-        this.rotatePieces = PreferenceManager
+        rotatePieces = PreferenceManager
                 .getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(R.string.rotate_pieces), true);
 
         // load drawables for move options drawing
-        this.moveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.move);
-        this.kickBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.kick);
-        this.spriteRect = new Rect(0, 0, moveBitmap.getWidth(), moveBitmap.getHeight());
+        moveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.move);
+        kickBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.kick);
+        spriteRect = new Rect(0, 0, moveBitmap.getWidth(), moveBitmap.getHeight());
 
         Piece.loadAssets(context.getResources());   // load drawables for Piece
         updateMoveIndicator();
@@ -122,7 +142,7 @@ public class Chessboard {
     // being called by GameView.onSizeChanged() to get the dimension of the View object
     public void resize(int w, int h) {
         int newBlockSize = Math.min(w/width, h/height);
-        this.blockSize = newBlockSize;
+        blockSize = newBlockSize;
         block = new Rect(0, 0, newBlockSize, newBlockSize);
     }
 
@@ -161,6 +181,38 @@ public class Chessboard {
     /*============================================================================================*/
     /* making moves */
 
+    private void deselect() {
+        selectedX = -1;
+        moveList = null;
+    }
+
+    private void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
+        state.makeMove(xStart, yStart, xEnd, yEnd, promote);
+        moveCount += 1;
+        deselect();
+        updateMoveIndicator();              // update text of telling who's move next
+        checkGameState();                   // check whether game is over
+        if (!state.isGameOver() && state.playerToMove == ai)
+            new AIThink().execute();
+    }
+
+    private boolean isValidMove(int xEnd, int yEnd) {
+        if (moveList == null || moveList.size() == 0)
+            return false;
+        for (int[] move : moveList) {
+            if (xEnd == move[2] && yEnd == move[3])
+                return true;
+        }
+        return false;
+    }
+
+    public void makePromotionMove(int promote) {
+        View promotionView = state.playerToMove == 1 ? wPromotionView : bPromotionView;
+        promotionView.setVisibility(View.INVISIBLE);
+        makeMove(promoteMove[0], promoteMove[1], promoteMove[2], promoteMove[3], promote);
+        gameView.invalidate();
+    }
+
     // handles player action of selecting and making moves
     public void select(float xPix, float yPix) {
         if (state.isGameOver()) checkGameState();  // game is already over
@@ -173,38 +225,19 @@ public class Chessboard {
         Piece piece = state.board[y][x];
         if (selectedX == x && selectedY == y) { // deselect
             deselect();
-        } else if (piece != null && piece.belongsTo(state.playerToMove) && state.playerToMove != ai) {
+        } else if (piece != null && piece.isBelongingTo(state.playerToMove) && state.playerToMove != ai) {
             selectedX = x;  // player selects a piece
             selectedY = y;
             moveList = piece.getMoveOptions(state.board, x, y, state.isMoved[y][x], state.lastMove);
-        } else if (validMove(x, y)) {    // player makes a move
-            makeMove(selectedX, selectedY, x, y);
-            if (!state.isGameOver() && state.playerToMove == ai)
-                new AIThink().execute();
+        } else if (isValidMove(x, y)) {    // player makes a move
+            Piece selectedPiece = state.board[selectedY][selectedX];
+            if (selectedPiece.isPromotion(state.board, x, y)) {
+                promoteMove = new int[]{selectedX, selectedY, x, y};    // save current move
+                showPromotionView();                                    // display promotion menu
+            } else {
+                makeMove(selectedX, selectedY, x, y, -1);
+            }
         }
-    }
-
-    private boolean validMove(int xEnd, int yEnd) {
-        if (moveList == null || moveList.size() == 0)
-            return false;
-        for (int[] move : moveList) {
-            if (xEnd == move[2] && yEnd == move[3])
-                return true;
-        }
-        return false;
-    }
-
-    private void makeMove(int xStart, int yStart, int xEnd, int yEnd) {
-        state.makeMove(xStart, yStart, xEnd, yEnd);
-        moveCount += 1;
-        deselect();
-        updateMoveIndicator();              // update text of telling who's move next
-        checkGameState();                   // check whether game is over
-    }
-
-    private void deselect() {
-        selectedX = -1;
-        moveList = null;
     }
 
     /*============================================================================================*/
@@ -220,6 +253,14 @@ public class Chessboard {
         indicatorView.setText(text);
     }
 
+    private void gameOverDialog(String text) {
+        Intent intent = new Intent(context, GameOverDialogActivity.class);
+        intent.putExtra(context.getString(R.string.winner_text), text);
+        intent.putExtra(context.getString(R.string.level_selected), level);
+        intent.putExtra(context.getString(R.string.ai_option), aiOption);
+        context.startActivity(intent);
+    }
+
     // check whether game is over
     private void checkGameState() {
         switch (state.checkWinner()) {
@@ -231,12 +272,11 @@ public class Chessboard {
         }
     }
 
-    private void gameOverDialog(String text) {
-        Intent intent = new Intent(context, GameOverDialogActivity.class);
-        intent.putExtra(context.getString(R.string.winner_text), text);
-        intent.putExtra(context.getString(R.string.level_selected), level);
-        intent.putExtra(context.getString(R.string.ai_option), aiOption);
-        context.startActivity(intent);
+    private void showPromotionView() {
+        View promotionView = state.playerToMove == 1 ? wPromotionView : bPromotionView;
+        promotionView.bringToFront();
+        promotionView.setVisibility(View.VISIBLE);
+
     }
 
     /*============================================================================================*/
@@ -252,7 +292,7 @@ public class Chessboard {
         @Override
         protected void onPostExecute(int[] move) {
             super.onPostExecute(move);
-            makeMove(move[0], move[1], move[2], move[3]);
+            makeMove(move[0], move[1], move[2], move[3], -1);
             gameView.invalidate();  // update canvas
         }
     }

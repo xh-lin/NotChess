@@ -54,7 +54,7 @@ public class PlayerAI {
                 for (int y = 0; y < boardHeight; y++) {
                     piece = board[y][x];
                     if (piece != null && (piece.isHeart() || piece.isKing()))
-                        (piece.belongsTo(1) ? wProtectees : bProtectees).add(new int[]{x, y});
+                        (piece.isBelongingTo(1) ? wProtectees : bProtectees).add(new int[]{x, y});
                 }
             }
         }
@@ -85,7 +85,7 @@ public class PlayerAI {
         for (int xStart = 0; xStart < boardWidth; xStart++) {
             for (int yStart = 0; yStart < boardHeight; yStart++) {
                 Piece pieceToMove = state.board[yStart][xStart];
-                if (pieceToMove != null && pieceToMove.belongsTo(state.playerToMove))
+                if (pieceToMove != null && pieceToMove.isBelongingTo(state.playerToMove))
                     moves.addAll(pieceToMove.getMoveOptions(state.board, xStart, yStart,
                             state.isMoved[yStart][xStart], state.lastMove));
             }
@@ -103,7 +103,7 @@ public class PlayerAI {
     // For a given GameState and move to be executed, return the GameState that results from the move
     private static GameState makeMove(GameState state, int[] move) {
         GameState newState = state.clone();
-        newState.makeMove(move[0], move[1], move[2], move[3]);
+        newState.makeMove(move[0], move[1], move[2], move[3], -1);
 
         if (newState.checkWinner() != 0)
             newState.points = state.playerToMove * victoryPoints;
@@ -131,7 +131,7 @@ public class PlayerAI {
                 piece = state.board[y][x];
                 if (piece != null) {
                     minDist = Integer.MAX_VALUE;
-                    targets = piece.belongsTo(1) ? bProtectees : wProtectees;
+                    targets = piece.isBelongingTo(1) ? bProtectees : wProtectees;
 
                     for (int[] location : targets) {
                         tmpDist = Math.abs(location[0] - x) + Math.abs(location[1] - y);
@@ -139,7 +139,7 @@ public class PlayerAI {
                             minDist = tmpDist;
                     }
 
-                    if (piece.belongsTo(1))
+                    if (piece.isBelongingTo(1))
                         score -= minDist;
                     else
                         score += minDist;

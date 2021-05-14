@@ -97,7 +97,7 @@ public enum Piece {
 
     // set the moving direction of W_Pawn or B_Pawn
     public boolean setPawnDirection(int direction) {
-        if ((this == W_Pawn || this == B_Pawn) && direction >= 0 && direction <= 3) {
+        if (this.isPawn() && direction >= 0 && direction <= 3) {
             pawnDirection = direction;
             return true;
         }
@@ -111,7 +111,7 @@ public enum Piece {
             else if (this == B_Pawn)
                 return 1;           // down
         }
-        return pawnDirection;       // returns -1 of not a pawn
+        return pawnDirection;       // will return -1 if not pawn
     }
 
     public int[] getPawnsForward() {
@@ -124,13 +124,13 @@ public enum Piece {
         int xEnd = xStart + dx;
         int yEnd = yStart + dy;
 
-        while (withinBoard(board, xEnd, yEnd)) {
+        while (isWithinBoard(board, xEnd, yEnd)) {
             target = board[yEnd][xEnd];
             if (target == null) {
                 moves.add(new int[]{xStart, yStart, xEnd, yEnd});
                 xEnd += dx;
                 yEnd += dy;
-            } else if (notFriendlyWith(target)) {
+            } else if (isNotFriendlyWith(target)) {
                 moves.add(new int[]{xStart, yStart, xEnd, yEnd});
                 break;
             } else {    // blocked by a friendly piece
@@ -167,9 +167,9 @@ public enum Piece {
                 for (int[] dir : kingMoveDirections) {
                     xEnd = xStart + dir[0];
                     yEnd = yStart + dir[1];
-                    if (withinBoard(board, xEnd, yEnd)) {
+                    if (isWithinBoard(board, xEnd, yEnd)) {
                         target = board[yEnd][xEnd];
-                        if (target == null || notFriendlyWith(target))
+                        if (target == null || isNotFriendlyWith(target))
                             moves.add(new int[]{xStart, yStart, xEnd, yEnd});
                     }
                 }
@@ -191,9 +191,9 @@ public enum Piece {
                 for (int[] dir : knightMoveDirections) {
                     xEnd = xStart + dir[0];
                     yEnd = yStart + dir[1];
-                    if (withinBoard(board, xEnd, yEnd)) {
+                    if (isWithinBoard(board, xEnd, yEnd)) {
                         target = board[yEnd][xEnd];
-                        if (target == null || notFriendlyWith(target))
+                        if (target == null || isNotFriendlyWith(target))
                             moves.add(new int[]{xStart, yStart, xEnd, yEnd});
                     }
                 }
@@ -215,7 +215,7 @@ public enum Piece {
                 for (int i = 0; i < steps; i++) {   // move forward
                     xEnd += pawnMoveDir[0][0];
                     yEnd += pawnMoveDir[0][1];
-                    if (withinBoard(board, xEnd, yEnd) && board[yEnd][xEnd] == null) {
+                    if (isWithinBoard(board, xEnd, yEnd) && board[yEnd][xEnd] == null) {
                         moves.add(new int[]{xStart, yStart, xEnd, yEnd});
                     } else {
                         break;
@@ -225,9 +225,9 @@ public enum Piece {
                 for (int i = 1; i <= 2; i++) {  // kick1, kick2
                     xEnd = xStart + pawnMoveDir[i][0];
                     yEnd = yStart + pawnMoveDir[i][1];
-                    if (withinBoard(board, xEnd, yEnd)) {
+                    if (isWithinBoard(board, xEnd, yEnd)) {
                         target = board[yEnd][xEnd];
-                        if (target != null && notFriendlyWith(target))
+                        if (target != null && isNotFriendlyWith(target))
                             moves.add(new int[]{xStart, yStart, xEnd, yEnd});
                     }
 
@@ -244,7 +244,7 @@ public enum Piece {
                         if (xSide == xLastEnd && ySide == yLastEnd) {
                             Piece lastMovedPiece = board[yLastEnd][xLastEnd];
                             // ... and that was a pawn ...
-                            if (lastMovedPiece == W_Pawn || lastMovedPiece == B_Pawn) {
+                            if (lastMovedPiece.isPawn()) {
                                 int lastMoveSteps = Math.abs(xLastEnd - xLastStart) + Math.abs(yLastEnd - yLastStart);
                                 // ... and that pawn moved two steps ...
                                 if (lastMoveSteps == TWO_STEPS) {
@@ -269,16 +269,27 @@ public enum Piece {
     /*============================================================================================*/
     /* utils */
 
-    private boolean notFriendlyWith(Piece target) {
+    private boolean isNotFriendlyWith(Piece target) {
         return (value > 0 && target.value < 0) || (value < 0 && target.value > 0);
     }
 
-    private boolean withinBoard(Piece[][] board, int x, int y) {
+    private boolean isWithinBoard(Piece[][] board, int x, int y) {
         return x >= 0 && x < board[0].length && y >= 0 && y < board.length;
     }
 
-    public boolean belongsTo(int player) {
+    public boolean isBelongingTo(int player) {
         return (value > 0 && player == 1) || (value < 0 && player == -1);
+    }
+
+    // does a pawn reach the edge?
+    public boolean isPromotion(Piece[][] board, int xEnd, int yEnd) {
+        if (this.isPawn()) {
+            int[] forward = getPawnsForward();
+            int frontX = xEnd + forward[0];
+            int frontY = yEnd + forward[1];
+            return !isWithinBoard(board, frontX, frontY);
+        }
+        return false;
     }
 
     public boolean isKing() {

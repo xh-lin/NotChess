@@ -25,13 +25,13 @@ public class Levels {
                     {W_Rook, W_Knight, W_Bishop, W_Queen, W_King, W_Bishop, W_Knight, W_Rook}
             },
             {
-                    {null, null, null, null, null, null, null, B_King},
+                    {null, null, null, null, null, B_Pawn, null, B_King},
                     {null, null, null, null, null, B_Pawn, null, null},
                     {null, null, null, null, null, null, null, null},
                     {null, null, null, null, null, null, null, null},
                     {null, null, null, null, null, null, null, null},
                     {null, null, null, null, W_Pawn, null, null, null},
-                    {W_King, null, null, null, null, null, null, null}
+                    {W_King, null, null, null, W_Pawn, null, null, null}
             }
     };
 }

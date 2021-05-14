@@ -3,6 +3,7 @@ package edu.umb.cs.notchess;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 public class LevelActivity extends Activity {
     public int level;
     public int aiOption;
+    public GameView chessBoardView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -23,20 +25,9 @@ public class LevelActivity extends Activity {
 
         level = getIntent().getExtras().getInt(getResources().getString(R.string.level_selected));
         aiOption = getIntent().getExtras().getInt(getResources().getString(R.string.ai_option));
-        
-        View chessBoardView = new GameView(this);
+
+        chessBoardView = new GameView(this);
         replaceView(findViewById(R.id.boardView), chessBoardView);
-
-
-
-//        LayoutInflater layoutInflater;
-//        layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//
-//        ConstraintLayout mainLayout = findViewById(R.id.constrainLayout);
-//        View view = layoutInflater.inflate(R.layout.promotion_white, null);
-//        view.setX(30);
-//        view.setY(30);
-//        mainLayout.addView(view, 2);
     }
 
     private void replaceView(View oldView, View newView) {
@@ -44,5 +35,16 @@ public class LevelActivity extends Activity {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) oldView.getLayoutParams();
         parent.removeView(oldView);
         parent.addView(newView, params);
+    }
+
+    // close promotion menu
+    public void hidePromotionView(View view) {
+        view.setVisibility(View.INVISIBLE);
+    }
+
+    // selected one of the promotion options
+    public void selectPromotion(View view) {
+        int promote = Integer.parseInt(view.getTag().toString());
+        chessBoardView.mChessboard.makePromotionMove(promote);
     }
 }

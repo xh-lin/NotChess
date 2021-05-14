@@ -1,7 +1,17 @@
 package edu.umb.cs.notchess;
 
+import androidx.annotation.NonNull;
+
+import static edu.umb.cs.notchess.Piece.B_Bishop;
+import static edu.umb.cs.notchess.Piece.B_Knight;
 import static edu.umb.cs.notchess.Piece.B_Pawn;
+import static edu.umb.cs.notchess.Piece.B_Queen;
+import static edu.umb.cs.notchess.Piece.B_Rook;
+import static edu.umb.cs.notchess.Piece.W_Bishop;
+import static edu.umb.cs.notchess.Piece.W_Knight;
 import static edu.umb.cs.notchess.Piece.W_Pawn;
+import static edu.umb.cs.notchess.Piece.W_Queen;
+import static edu.umb.cs.notchess.Piece.W_Rook;
 
 // for PlayerAI to do calculations
 public class GameState {
@@ -49,11 +59,12 @@ public class GameState {
         return winner;
     }
 
+    @NonNull
     public GameState clone() {
         return new GameState(board, isMoved, wPieceCount, bPieceCount, lastMove, playerToMove);
     }
 
-    public void makeMove(int xStart, int yStart, int xEnd, int yEnd) {
+    public void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
         Piece toMove = board[yStart][xStart];
         Piece kicked = board[yEnd][xEnd];
 
@@ -67,21 +78,41 @@ public class GameState {
         isMoved[yEnd][xEnd] = true;
 
         // special move: en passant (in passing)
-        if (kicked == null && (toMove == W_Pawn || toMove == B_Pawn)) {
+        if (kicked == null && toMove.isPawn()) {
             int[] pawnsForward = toMove.getPawnsForward();
             int xBehind = xEnd - pawnsForward[0];
             int yBehind = yEnd - pawnsForward[1];
             Piece pieceBehind = board[yBehind][xBehind];
-            if (pieceBehind == W_Pawn || pieceBehind == B_Pawn) {   // if it was en passant move
+            if (pieceBehind != null && pieceBehind.isPawn()) {      // if it was en passant move
                 kicked = pieceBehind;
                 board[yBehind][xBehind] = null;
             }
         }
 
+        // special move: promotion
+        // promote: None(-1), Queen(0), Bishop(1), Knight(2), Rook(3)
+        if (promote >= 0 && promote <= 3 && toMove.isPawn()) {
+            boolean w = toMove.isBelongingTo(1);
+            switch(promote) {
+                case 0:
+                    toMove = w ? W_Queen : B_Queen;
+                    break;
+                case 1:
+                    toMove = w ? W_Bishop : B_Bishop;
+                    break;
+                case 2:
+                    toMove = w ? W_Knight : B_Knight;
+                    break;
+                case 3:
+                    toMove = w ? W_Rook : B_Rook;
+            }
+            board[yEnd][xEnd] = toMove;
+        }
+
         // count the number of pieces left
         if (kicked != null) {
             int idx = kicked.isHeart() ? 0 : kicked.isKing() ? 1 : 2;
-            if (kicked.belongsTo(1)) wPieceCount[idx] -= 1;
+            if (kicked.isBelongingTo(1)) wPieceCount[idx] -= 1;
             else bPieceCount[idx] -= 1;
         }
 
