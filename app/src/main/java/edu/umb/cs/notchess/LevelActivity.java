@@ -38,7 +38,7 @@ public class LevelActivity extends Activity {
     }
 
     // close promotion menu
-    public void hidePromotionView(View view) {
+    public void hideView(View view) {
         view.setVisibility(View.INVISIBLE);
     }
 

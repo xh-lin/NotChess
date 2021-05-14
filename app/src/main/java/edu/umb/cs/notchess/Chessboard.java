@@ -9,7 +9,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
-import static edu.umb.cs.notchess.Piece.*;
 
 public class Chessboard {
     private final Context context;          // context of GameView
@@ -70,11 +68,11 @@ public class Chessboard {
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ConstraintLayout mainLayout = levelActivity.findViewById(R.id.constrainLayout);
 
-        wPromotionView = layoutInflater.inflate(R.layout.promotion_white, null);
+        wPromotionView = layoutInflater.inflate(R.layout.window_promotion_white, null);
         mainLayout.addView(wPromotionView, mainLayout.getLayoutParams());
         wPromotionView.setVisibility(View.INVISIBLE);
 
-        bPromotionView = layoutInflater.inflate(R.layout.promotion_black, null);
+        bPromotionView = layoutInflater.inflate(R.layout.window_promotion_black, null);
         mainLayout.addView(bPromotionView, mainLayout.getLayoutParams());
         bPromotionView.setVisibility(View.INVISIBLE);
 
@@ -116,7 +114,7 @@ public class Chessboard {
         blackPaint = new Paint();
         blackPaint.setColor(ContextCompat.getColor(context, R.color.brown));
         selectedPaint = new Paint();
-        selectedPaint.setColor(ContextCompat.getColor(context, R.color.light_yellow));
+        selectedPaint.setColor(ContextCompat.getColor(context, R.color.trans_yellow));
 
         // load rotate pieces setting
         rotatePieces = PreferenceManager
@@ -146,6 +144,10 @@ public class Chessboard {
         block = new Rect(0, 0, newBlockSize, newBlockSize);
     }
 
+    private boolean isNeedRotate() {
+        return rotatePieces && ai == 0 && state.playerToMove == -1;
+    }
+
     public void draw(Canvas canvas) {
         boolean white;
         for (int x = 0; x < width; x++) {
@@ -163,7 +165,7 @@ public class Chessboard {
                 // draw a piece
                 Piece piece = state.board[y][x];
                 if (piece != null)
-                    piece.draw(canvas, block, state.playerToMove == -1 && rotatePieces && ai == 0);
+                    piece.draw(canvas, block, isNeedRotate());
             }
         }
         // draw move options
@@ -208,7 +210,7 @@ public class Chessboard {
 
     public void makePromotionMove(int promote) {
         View promotionView = state.playerToMove == 1 ? wPromotionView : bPromotionView;
-        promotionView.setVisibility(View.INVISIBLE);
+        promotionView.setVisibility(View.INVISIBLE);        // close promotion menu
         makeMove(promoteMove[0], promoteMove[1], promoteMove[2], promoteMove[3], promote);
         gameView.invalidate();
     }

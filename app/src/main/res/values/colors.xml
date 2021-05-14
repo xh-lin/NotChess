@@ -9,5 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="brown">#B58863</color>
     <color name="beige">#F0D9B5</color>
-    <color name="light_yellow">#80FFFF8B</color>
+    <color name="trans_yellow">#80FFFF8B</color>
+    <color name="trans_grey">#8080808B</color>
 </resources>
