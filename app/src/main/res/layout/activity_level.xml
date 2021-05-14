@@ -14,10 +14,10 @@
 
     <TextView
         android:id="@+id/indicatorView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:layout_marginStart="8dp"
-        android:text="[replace]'s move"
+        android:layout_marginHorizontal="8dp"
+        android:text=""
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

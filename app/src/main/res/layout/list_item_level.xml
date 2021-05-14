@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="90dp"
     android:layout_height="60dp"
     android:background="@color/purple_200"
     android:gravity="center"
-    android:text="[x]"
-    android:textSize="30dp"
+    android:text=""
+    android:textSize="30sp"
     android:textColor="@color/white">
 
 </TextView>
