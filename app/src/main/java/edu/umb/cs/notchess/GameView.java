@@ -9,9 +9,9 @@ import android.widget.TextView;
 public class GameView extends View {
     private final Chessboard mChessboard;
 
-    public GameView(Context context, int level, int aiOption, TextView indicatorView) {
+    public GameView(Context context) {
         super(context);
-        mChessboard = new Chessboard(context, level, aiOption, this, indicatorView);
+        mChessboard = new Chessboard(context, this);
     }
 
     @Override

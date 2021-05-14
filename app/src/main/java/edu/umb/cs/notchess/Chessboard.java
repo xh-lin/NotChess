@@ -50,15 +50,16 @@ public class Chessboard {
     private int ai = 0;                     // 1 -> White, -1 -> Black, 0 -> disable
     private int moveCount = 0;              // for indicatorView to display
 
-    public Chessboard(Context context, int level, int aiOption, View gameView, TextView indicatorView) {
+    public Chessboard(Context context, View gameView) {
+        LevelActivity levelActivity = ((LevelActivity) context);
         this.context = context;
-        this.level = level;
-        this.aiOption = aiOption;
+        this.level = levelActivity.level;
+        this.aiOption = levelActivity.aiOption;
         this.gameView = gameView;
-        this.indicatorView = indicatorView;
+        this.indicatorView = levelActivity.findViewById(R.id.indicatorView);
 
         // load the chess board
-        Piece[][] board = Levels.boards[level]; // get board by index
+        Piece[][] board = Levels.boards[this.level]; // get board by index
 
         this.width = board[0].length;           // get dimension
         this.height = board.length;
@@ -81,7 +82,7 @@ public class Chessboard {
         state = new GameState(board, isMoved, wPieceCount, bPieceCount, null, 1);
 
         // playerAI option
-        switch (aiOption) {
+        switch (this.aiOption) {
             case 1: // Black
                 this.ai = -1;
                 break;
