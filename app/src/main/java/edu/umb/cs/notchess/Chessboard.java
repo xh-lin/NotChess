@@ -53,7 +53,6 @@ public class Chessboard {
 
     private final View gameOverView;
 
-    private ArrayList<int[]> attackList;
 
     public Chessboard(Context context, View gameView) {
         LevelActivity levelActivity = ((LevelActivity) context);
@@ -184,20 +183,6 @@ public class Chessboard {
                 }
             }
         }
-
-
-        // draw attacking blocks of selected piece
-        if (attackList != null) {
-            for (int[] attack : attackList) {
-                int xEnd = attack[2];
-                int yEnd = attack[3];
-                block.offsetTo(blockSize * xEnd, blockSize * yEnd);
-                canvas.drawBitmap(kickBitmap, spriteRect, block, null);
-                canvas.drawBitmap(kickBitmap, spriteRect, block, null);
-            }
-        }
-
-
     }
 
     /*============================================================================================*/
@@ -206,7 +191,6 @@ public class Chessboard {
     private void deselect() {
         selectedX = -1;
         moveList = null;
-        attackList = null;
     }
 
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
@@ -252,7 +236,6 @@ public class Chessboard {
             selectedX = x;  // player selects a piece
             selectedY = y;
             moveList = piece.getMoveOptions(state, x, y, false);
-            attackList = state.attacking[y][x];
         } else if (isValidMove(x, y)) {    // player makes a move
             Piece selectedPiece = state.board[selectedY][selectedX];
             if (selectedPiece.isPromotion(state.board, x, y)) {

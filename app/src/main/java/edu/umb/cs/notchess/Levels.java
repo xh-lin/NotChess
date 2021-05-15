@@ -3,7 +3,8 @@ package edu.umb.cs.notchess;
 import static edu.umb.cs.notchess.Piece.*;
 
 public class Levels {
-    static final String[] titles = {"Hold Your Horse", "Regular Chess", "En Passant to Promotion"};
+    static final String[] titles = {"Hold Your Horse", "Regular Chess", "En Passant to Promotion",
+            "Every Day I'm Castling"};
 
     static final Piece[][][] boards = {
             {
@@ -32,6 +33,15 @@ public class Levels {
                     {null, W_Pawn, null, null, null, null, null, null},
                     {null, null, null, W_Pawn, null, null, null, null},
                     {W_King, null, null, null, null, W_Pawn, null, null}
+            },
+            {
+                    {B_Rook, null, null, null, B_King, null, null, B_Rook},
+                    {null, null, null, null, null, null, B_Pawn, null},
+                    {W_Pawn, null, null, null, null, null, null, null},
+                    {W_Rook, null, null, null, null, W_King, W_Rook, null},
+                    {null, null, null, null, null, null, null, null},
+                    {null, null, null, null, null, null, null, null},
+                    {null, null, null, null, B_Rook, W_Rook, null, null}
             }
     };
 }

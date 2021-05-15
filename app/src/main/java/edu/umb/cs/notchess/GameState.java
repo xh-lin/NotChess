@@ -1,8 +1,13 @@
 package edu.umb.cs.notchess;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+
 import static edu.umb.cs.notchess.Piece.*;
 
 // for PlayerAI to do calculations
@@ -17,9 +22,9 @@ public class GameState {
     public int moveCount;               // number of moves made
     public double points;               // used for AI's MinMax algorithm
 
+    public HashSet<List<Integer>>[][] underAttackByW;   // each block is being attacked by which ...
+    public HashSet<List<Integer>>[][] underAttackByB;   // ... using List so HashSet can compare it
     public ArrayList<int[]>[][] attacking;     // each piece is attacking which blocks
-    public HashSet<ArrayList<Integer>>[][] wUnderAttacked;
-    public HashSet<ArrayList<Integer>>[][] bUnderAttacked;
 
 
     GameState(Piece[][] board, int[] wPieceCount, int[] bPieceCount,
@@ -52,6 +57,15 @@ public class GameState {
         points = 0;
 
         // initialize attacking blocks for each piece
+        underAttackByW = new HashSet[height][width];
+        underAttackByB = new HashSet[height][width];
+        for (int x = 0; x < width; x ++) {
+            for (int y = 0; y < height; y ++) {
+                underAttackByW[y][x] = new HashSet<>();
+                underAttackByB[y][x] = new HashSet<>();
+            }
+        }
+
         attacking = new ArrayList[height][width];
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
@@ -61,9 +75,31 @@ public class GameState {
         }
     }
 
+    public boolean underAttackBy(int player, int x, int y) {
+        return (player == 1 ? underAttackByW : underAttackByB)[y][x].size() != 0;
+    }
+
     private void updateAttacking(int xBefore, int yBefore, int xNow, int yNow) {
+        HashSet<List<Integer>>[][] attacked = board[yNow][xNow].isBelongingTo(1) ?
+                underAttackByW : underAttackByB;
+
+        // remove old attacking info
+        if (attacking[yBefore][xBefore] != null) {  // need to check b/c null when initializing
+            for (int[] attackBlock : attacking[yBefore][xBefore]) {
+                int xEnd = attackBlock[2];
+                int yEnd = attackBlock[3];
+                attacked[yEnd][xEnd].remove(Arrays.asList(xBefore, yBefore));
+            }
+        }
         attacking[yBefore][xBefore] = null;
+
+        // add new attacking info
         attacking[yNow][xNow] = board[yNow][xNow].getMoveOptions(this, xNow, yNow, true);
+        for (int[] attackBlock : attacking[yNow][xNow]) {
+            int xEnd = attackBlock[2];
+            int yEnd = attackBlock[3];
+            attacked[yEnd][xEnd].add(Arrays.asList(xNow, yNow));
+        }
     }
 
     public boolean isGameOver() {
