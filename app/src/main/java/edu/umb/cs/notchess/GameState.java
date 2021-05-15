@@ -1,42 +1,45 @@
 package edu.umb.cs.notchess;
 
 import androidx.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.HashSet;
-
-import static edu.umb.cs.notchess.Piece.B_Bishop;
-import static edu.umb.cs.notchess.Piece.B_Knight;
-import static edu.umb.cs.notchess.Piece.B_Pawn;
-import static edu.umb.cs.notchess.Piece.B_Queen;
-import static edu.umb.cs.notchess.Piece.B_Rook;
-import static edu.umb.cs.notchess.Piece.W_Bishop;
-import static edu.umb.cs.notchess.Piece.W_Knight;
-import static edu.umb.cs.notchess.Piece.W_Pawn;
-import static edu.umb.cs.notchess.Piece.W_Queen;
-import static edu.umb.cs.notchess.Piece.W_Rook;
+import static edu.umb.cs.notchess.Piece.*;
 
 // for PlayerAI to do calculations
 public class GameState {
     public final Piece[][] board;       // representation of the chess board
-    public final boolean[][] isMoved;   // whether a piece has visited or move away from a block
     public final int[] wPieceCount;     // for determining whether the game is over ...
     public final int[] bPieceCount;     // ... {Hearts, Kings, others}
+    public final boolean[][] isMoved;   // whether a piece has visited or move away from a block
     public int[] lastMove;              // {xStart, yStart, xEnd, yEnd}
     public int playerToMove;            // 1 -> White, -1 -> Black
     public int winner;                  // 1 -> White, -1 -> Black, 0 -> game not over
     public int moveCount;               // number of moves made
     public double points;               // used for AI's MinMax algorithm
 
-    GameState(Piece[][] board, boolean[][] isMoved, int[] wPieceCount, int[] bPieceCount,
-              int[] lastMove, int playerToMove) {
-        Piece[][] newBoard = new Piece[board.length][];
-        for (int i = 0; i < board.length; i++)
+    public ArrayList<int[]>[][] attacking;     // each piece is attacking which blocks
+    public HashSet<ArrayList<Integer>>[][] wUnderAttacked;
+    public HashSet<ArrayList<Integer>>[][] bUnderAttacked;
+
+
+    GameState(Piece[][] board, int[] wPieceCount, int[] bPieceCount,
+              boolean[][] isMoved, int[] lastMove, int playerToMove) {
+        int width = board[0].length;
+        int height = board.length;
+
+        Piece[][] newBoard = new Piece[height][];
+        for (int i = 0; i < height; i++)
             newBoard[i] = board[i].clone();
 
-        boolean[][] newIsMoved = new boolean[isMoved.length][];
-        for (int i = 0; i < isMoved.length; i++)
-            newIsMoved[i] = isMoved[i].clone();
+        boolean[][] newIsMoved;
+        if (isMoved == null) {
+            newIsMoved = new boolean[height][width];   // default values are false
+        }
+        else {
+            newIsMoved = new boolean[height][];
+                for (int i = 0; i < height; i++)
+                    newIsMoved[i] = isMoved[i].clone();
+        }
 
         this.board = newBoard;
         this.isMoved = newIsMoved;
@@ -47,6 +50,20 @@ public class GameState {
         winner = 0;
         moveCount = 0;
         points = 0;
+
+        // initialize attacking blocks for each piece
+        attacking = new ArrayList[height][width];
+        for (int x = 0; x < width; x ++) {
+            for (int y = 0; y < height; y ++) {
+                if (board[y][x] != null)
+                    updateAttacking(x, y, x, y);
+            }
+        }
+    }
+
+    private void updateAttacking(int xBefore, int yBefore, int xNow, int yNow) {
+        attacking[yBefore][xBefore] = null;
+        attacking[yNow][xNow] = board[yNow][xNow].getMoveOptions(this, xNow, yNow, true);
     }
 
     public boolean isGameOver() {
@@ -66,7 +83,7 @@ public class GameState {
 
     @NonNull
     public GameState clone() {
-        return new GameState(board, isMoved, wPieceCount, bPieceCount, lastMove, playerToMove);
+        return new GameState(board, wPieceCount, bPieceCount, isMoved, lastMove, playerToMove);
     }
 
     public void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
@@ -123,5 +140,7 @@ public class GameState {
 
         playerToMove = -playerToMove;   // opponent is the next player to move
         moveCount += 1;
+
+        updateAttacking(xStart, yStart, xEnd, yEnd);
     }
 }

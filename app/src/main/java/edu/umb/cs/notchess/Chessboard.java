@@ -1,7 +1,6 @@
 package edu.umb.cs.notchess;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -12,7 +11,6 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
@@ -55,6 +53,8 @@ public class Chessboard {
 
     private final View gameOverView;
 
+    private ArrayList<int[]> attackList;
+
     public Chessboard(Context context, View gameView) {
         LevelActivity levelActivity = ((LevelActivity) context);
         int level = levelActivity.level;        // index of Levels.boards
@@ -84,11 +84,8 @@ public class Chessboard {
 
         // preparing the game state
         Piece[][] board = Levels.boards[level]; // load the chess board by index
-
         width = board[0].length;           // get dimension
         height = board.length;
-
-        boolean[][] isMoved = new boolean[height][width];   // default values are false
 
         // count the number of pieces for determining whether game is over
         int[] wPieceCount = new int[]{0, 0, 0};     // {Hearts, Kings, others}
@@ -103,7 +100,7 @@ public class Chessboard {
             }
         }
 
-        state = new GameState(board, isMoved, wPieceCount, bPieceCount, null, 1);
+        state = new GameState(board, wPieceCount, bPieceCount, null, null, 1);
         initState = state.clone();
 
         // playerAI option
@@ -187,6 +184,20 @@ public class Chessboard {
                 }
             }
         }
+
+
+        // draw attacking blocks of selected piece
+        if (attackList != null) {
+            for (int[] attack : attackList) {
+                int xEnd = attack[2];
+                int yEnd = attack[3];
+                block.offsetTo(blockSize * xEnd, blockSize * yEnd);
+                canvas.drawBitmap(kickBitmap, spriteRect, block, null);
+                canvas.drawBitmap(kickBitmap, spriteRect, block, null);
+            }
+        }
+
+
     }
 
     /*============================================================================================*/
@@ -195,6 +206,7 @@ public class Chessboard {
     private void deselect() {
         selectedX = -1;
         moveList = null;
+        attackList = null;
     }
 
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
@@ -239,7 +251,8 @@ public class Chessboard {
         } else if (piece != null && piece.isBelongingTo(state.playerToMove) && state.playerToMove != ai) {
             selectedX = x;  // player selects a piece
             selectedY = y;
-            moveList = piece.getMoveOptions(state, x, y);
+            moveList = piece.getMoveOptions(state, x, y, false);
+            attackList = state.attacking[y][x];
         } else if (isValidMove(x, y)) {    // player makes a move
             Piece selectedPiece = state.board[selectedY][selectedX];
             if (selectedPiece.isPromotion(state.board, x, y)) {

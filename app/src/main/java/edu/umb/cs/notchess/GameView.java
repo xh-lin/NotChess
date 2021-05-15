@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
 
 public class GameView extends View {
     public final Chessboard mChessboard;

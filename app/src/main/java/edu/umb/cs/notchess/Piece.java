@@ -119,7 +119,7 @@ public enum Piece {
     }
 
     private void addSlideMoves(ArrayList<int[]> moves, Piece[][] board,
-                               int xStart, int yStart, int dx, int dy) {
+                               int xStart, int yStart, int dx, int dy, boolean getAttacks) {
         Piece target;
         int xEnd = xStart + dx;
         int yEnd = yStart + dy;
@@ -130,7 +130,7 @@ public enum Piece {
                 moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                 xEnd += dx;
                 yEnd += dy;
-            } else if (isNotFriendlyWith(target)) {
+            } else if (getAttacks || isNotFriendlyWith(target)) {
                 moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                 break;
             } else {    // blocked by a friendly piece
@@ -140,26 +140,26 @@ public enum Piece {
     }
 
     private void addBishopMoves(ArrayList<int[]> moves, Piece[][] board,
-                                int xStart, int yStart) {
-        addSlideMoves(moves, board, xStart, yStart, -1, -1);    // ↖ moves
-        addSlideMoves(moves, board, xStart, yStart, 1, 1);    // ↘ moves
-        addSlideMoves(moves, board, xStart, yStart, 1, -1);    // ↗ moves
-        addSlideMoves(moves, board, xStart, yStart, -1, 1);    // ↙ moves
+                                int xStart, int yStart, boolean getAttacks) {
+        addSlideMoves(moves, board, xStart, yStart, -1, -1, getAttacks);    // ↖ moves
+        addSlideMoves(moves, board, xStart, yStart, 1, 1, getAttacks);    // ↘ moves
+        addSlideMoves(moves, board, xStart, yStart, 1, -1, getAttacks);    // ↗ moves
+        addSlideMoves(moves, board, xStart, yStart, -1, 1, getAttacks);    // ↙ moves
     }
 
     private void addRookMoves(ArrayList<int[]> moves, Piece[][] board,
-                              int xStart, int yStart) {
-        addSlideMoves(moves, board, xStart, yStart, 0, -1);    // ↑ moves
-        addSlideMoves(moves, board, xStart, yStart, 0, 1);    // ↓ moves
-        addSlideMoves(moves, board, xStart, yStart, -1, 0);    // ← moves
-        addSlideMoves(moves, board, xStart, yStart, 1, 0);    // → moves
+                              int xStart, int yStart, boolean getAttacks) {
+        addSlideMoves(moves, board, xStart, yStart, 0, -1, getAttacks);    // ↑ moves
+        addSlideMoves(moves, board, xStart, yStart, 0, 1, getAttacks);    // ↓ moves
+        addSlideMoves(moves, board, xStart, yStart, -1, 0, getAttacks);    // ← moves
+        addSlideMoves(moves, board, xStart, yStart, 1, 0, getAttacks);    // → moves
     }
 
     // check for promotion before adding a move
     private void addPawnMoves(ArrayList<int[]> moves, Piece[][] board,
-                              int xStart, int yStart, int xEnd, int yEnd) {
-        if (isPromotion(board, xEnd, yEnd)) {       // add move for each the promotion option
-            for (int promote = 0; promote <= 3; promote++)
+                              int xStart, int yStart, int xEnd, int yEnd, boolean getAttacks) {
+        if (!getAttacks && isPromotion(board, xEnd, yEnd)) {
+            for (int promote = 0; promote <= 3; promote++)  // add move for each the promotion option
                 moves.add(new int[]{xStart, yStart, xEnd, yEnd, promote});
         } else {
             moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
@@ -167,7 +167,8 @@ public enum Piece {
     }
 
     // returns an array list of int array: {xStart, yStart, xEnd, yEnd, promote}
-    public ArrayList<int[]> getMoveOptions(GameState state, int xStart, int yStart) {
+    public ArrayList<int[]> getMoveOptions(GameState state, int xStart, int yStart,
+                                           boolean getAttacks) {
         ArrayList<int[]> moves = new ArrayList<>();
         int xEnd, yEnd;
         Piece target;
@@ -180,7 +181,7 @@ public enum Piece {
                     yEnd = yStart + dir[1];
                     if (isWithinBoard(state.board, xEnd, yEnd)) {
                         target = state.board[yEnd][xEnd];
-                        if (target == null || isNotFriendlyWith(target))
+                        if (getAttacks || target == null || isNotFriendlyWith(target))
                             moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                     }
                 }
@@ -188,13 +189,13 @@ public enum Piece {
 
             case W_Queen:
             case B_Queen:
-                addBishopMoves(moves, state.board, xStart, yStart);
-                addRookMoves(moves, state.board, xStart, yStart);
+                addBishopMoves(moves, state.board, xStart, yStart, getAttacks);
+                addRookMoves(moves, state.board, xStart, yStart, getAttacks);
                 break;
 
             case W_Bishop:
             case B_Bishop:
-                addBishopMoves(moves, state.board, xStart, yStart);
+                addBishopMoves(moves, state.board, xStart, yStart, getAttacks);
                 break;
 
             case W_Knight:
@@ -204,7 +205,7 @@ public enum Piece {
                     yEnd = yStart + dir[1];
                     if (isWithinBoard(state.board, xEnd, yEnd)) {
                         target = state.board[yEnd][xEnd];
-                        if (target == null || isNotFriendlyWith(target))
+                        if (getAttacks || target == null || isNotFriendlyWith(target))
                             moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                     }
                 }
@@ -212,7 +213,7 @@ public enum Piece {
 
             case W_Rook:
             case B_Rook:
-                addRookMoves(moves, state.board, xStart, yStart);
+                addRookMoves(moves, state.board, xStart, yStart, getAttacks);
                 break;
 
             case W_Pawn:
@@ -226,8 +227,8 @@ public enum Piece {
                 for (int i = 0; i < steps; i++) {   // move forward
                     xEnd += pawnMoveDir[0][0];
                     yEnd += pawnMoveDir[0][1];
-                    if (isWithinBoard(state.board, xEnd, yEnd) && state.board[yEnd][xEnd] == null) {
-                        addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd);
+                    if (!getAttacks && isWithinBoard(state.board, xEnd, yEnd) && state.board[yEnd][xEnd] == null) {
+                        addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd, getAttacks);
                     } else {
                         break;
                     }
@@ -238,8 +239,8 @@ public enum Piece {
                     yEnd = yStart + pawnMoveDir[i][1];
                     if (isWithinBoard(state.board, xEnd, yEnd)) {
                         target = state.board[yEnd][xEnd];
-                        if (target != null && isNotFriendlyWith(target))
-                            addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd);
+                        if (getAttacks || (target != null && isNotFriendlyWith(target)))
+                            addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd, getAttacks);
                     }
 
                     // special move: en passant (in passing)
@@ -265,7 +266,7 @@ public enum Piece {
                                     // ... and that pawn moves in a opposite direction of this pawn ...
                                     if (xLastOpDir == pawnMoveDir[0][0] && yLastOpDir == pawnMoveDir[0][1]) {
                                         // ... then this pawn can capture that passing pawn
-                                        addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd);
+                                        addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd, getAttacks);
                                     }
                                 }
                             }

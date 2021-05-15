@@ -4,7 +4,6 @@ import android.util.Log;
 import androidx.core.math.MathUtils;
 import java.util.ArrayList;
 import java.util.Collections;
-import static edu.umb.cs.notchess.Piece.*;
 
 public class PlayerAI {
     // for getScore() calculation
@@ -86,7 +85,7 @@ public class PlayerAI {
             for (int yStart = 0; yStart < boardHeight; yStart++) {
                 Piece pieceToMove = state.board[yStart][xStart];
                 if (pieceToMove != null && pieceToMove.isBelongingTo(state.playerToMove))
-                    moves.addAll(pieceToMove.getMoveOptions(state, xStart, yStart));
+                    moves.addAll(pieceToMove.getMoveOptions(state, xStart, yStart, false));
             }
         }
 
