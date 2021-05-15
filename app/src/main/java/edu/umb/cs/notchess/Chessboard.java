@@ -239,7 +239,7 @@ public class Chessboard {
         } else if (piece != null && piece.isBelongingTo(state.playerToMove) && state.playerToMove != ai) {
             selectedX = x;  // player selects a piece
             selectedY = y;
-            moveList = piece.getMoveOptions(state.board, x, y, state.isMoved[y][x], state.lastMove);
+            moveList = piece.getMoveOptions(state, x, y);
         } else if (isValidMove(x, y)) {    // player makes a move
             Piece selectedPiece = state.board[selectedY][selectedX];
             if (selectedPiece.isPromotion(state.board, x, y)) {

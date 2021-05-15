@@ -2,6 +2,9 @@ package edu.umb.cs.notchess;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
 import static edu.umb.cs.notchess.Piece.B_Bishop;
 import static edu.umb.cs.notchess.Piece.B_Knight;
 import static edu.umb.cs.notchess.Piece.B_Pawn;
@@ -81,7 +84,7 @@ public class GameState {
 
         // special move: en passant (in passing)
         if (kicked == null && toMove.isPawn()) {
-            int[] pawnsForward = toMove.getPawnsForward();
+            int[] pawnsForward = toMove.getPawnForward();
             int xBehind = xEnd - pawnsForward[0];
             int yBehind = yEnd - pawnsForward[1];
             Piece pieceBehind = board[yBehind][xBehind];

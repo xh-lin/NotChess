@@ -86,8 +86,7 @@ public class PlayerAI {
             for (int yStart = 0; yStart < boardHeight; yStart++) {
                 Piece pieceToMove = state.board[yStart][xStart];
                 if (pieceToMove != null && pieceToMove.isBelongingTo(state.playerToMove))
-                    moves.addAll(pieceToMove.getMoveOptions(state.board, xStart, yStart,
-                            state.isMoved[yStart][xStart], state.lastMove));
+                    moves.addAll(pieceToMove.getMoveOptions(state, xStart, yStart));
             }
         }
 
