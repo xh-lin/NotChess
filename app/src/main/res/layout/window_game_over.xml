@@ -27,7 +27,8 @@
             android:textStyle="bold"
             android:gravity="center"
             android:layout_marginHorizontal="8dp"
-            android:layout_marginVertical="20dp"/>
+            android:layout_marginVertical="20dp"
+            android:id="@+id/game_over_text_view"/>
 
         <Button
             android:layout_width="wrap_content"

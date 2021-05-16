@@ -1,15 +1,11 @@
 <resources>
     <string name="app_name">Not Chess</string>
 
-    <!--  keys  -->
+    <!--  Key  -->
     <string name="start_level">start_level</string>
     <string name="start_ai_option">start_ai_option</string>
 
-    <!--  game over dialog text  -->
-    <string name="black_wins">Black Wins</string>
-    <string name="white_wins">White Wins</string>
-
-    <!--  settings  -->
+    <!--  Setting  -->
     <string name="setting_rotate_pieces">setting_rotate_pieces</string>
     <string name="rotate_pieces_title">Rotate Pieces</string>
     <string name="rotate_pieces_summary">Rotate the direction of pieces when it is black\'s turn.</string>
@@ -17,12 +13,18 @@
     <string name="show_attack_info_title">Show Attack Info</string>
     <string name="show_attack_info_summary">Show attacking and under attack info of touched block.</string>
 
+    <!--  game over dialog text  -->
+    <string name="black_wins">Black Wins</string>
+    <string name="white_wins">White Wins</string>
+
+    <!--  Text  -->
     <string name="whites_move">%d. White\'s move</string>
     <string name="blacks_move">%d. Black\'s move</string>
     <string name="white_is_thinking">%d. White is thinking</string>
     <string name="black_is_thinking">%d. Black is thinking</string>
     <string name="play_with_ai">Play with AI:</string>
 
+    <!--  Word  -->
     <string name="levels">Levels</string>
     <string name="customize">Customize</string>
     <string name="settings">Settings</string>

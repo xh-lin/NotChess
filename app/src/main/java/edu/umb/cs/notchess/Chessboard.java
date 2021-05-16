@@ -311,19 +311,21 @@ public class Chessboard {
             new AIThink().execute(ai);  // execute playerAI if it is the first to move
     }
 
-    private void showGameOverDialog(String text) {
+    private void showGameOverDialog(int textId) {
         gameOverView.bringToFront();
         gameOverView.setVisibility(View.VISIBLE);
+        TextView textView = gameOverView.findViewById(R.id.game_over_text_view);
+        textView.setText(textId);
     }
 
     // check whether game is over
     private void checkGameState() {
         switch (state.checkWinner()) {
             case 1:
-                showGameOverDialog(context.getString(R.string.white_wins));
+                showGameOverDialog(R.string.white_wins);
                 break;
             case -1:
-                showGameOverDialog(context.getString(R.string.black_wins));
+                showGameOverDialog(R.string.black_wins);
         }
     }
 
