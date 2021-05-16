@@ -18,6 +18,7 @@ import androidx.core.math.MathUtils;
 
 import java.time.chrono.MinguoChronology;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Chessboard {
     private final Context context;          // context of GameView
@@ -37,11 +38,17 @@ public class Chessboard {
 
     private int blockSize;                  // width/height of a block
     private Rect block;                     // used for drawing each block of the board
-    private final boolean rotatePieces;     // rotate pieces option from the setting
+    private final boolean doRotatePieces;   // rotate pieces option from the setting
 
     private final Bitmap moveBitmap;        // for showing move options
     private final Bitmap kickBitmap;        // for showing move options to kick a piece
     private final Rect spriteRect;          // for drawing moveBitmap and kickBitmap
+    
+    private final Paint redPaint;           // for drawing attacking info
+    private final Paint greenPaint;         // dor drawing under attack info
+    private int infoX = -1;                 // coordinate to draw
+    private int infoY = -1;
+    private final boolean doShowAttackInfo; // show attack info option from the setting
 
     /* for making moves */
 
@@ -49,13 +56,12 @@ public class Chessboard {
     private int selectedY = -1;
     private ArrayList<int[]> moveList;      // move options of currently selected piece
 
-    private int ai = 0;                     // 1 -> White, -1 -> Black, 0 -> disable
-
-    private int[] promoteMove;
-    private final View wPromotionView;          // for promotion
+    private int[] promoteMove;              // for remembering the promotion move
+    private final View wPromotionView;      // pawn promotion menu
     private final View bPromotionView;
 
-    private final View gameOverView;
+    private final View gameOverView;        // game over dialog
+    private int ai = 0;                     // 1 -> White, -1 -> Black, 0 -> disable
 
 
     public Chessboard(Context context, View gameView) {
@@ -115,7 +121,7 @@ public class Chessboard {
                 ai = 1;
         }
 
-        // paints
+        // create paints
         whitePaint = new Paint();
         whitePaint.setColor(ContextCompat.getColor(context, R.color.beige));
         blackPaint = new Paint();
@@ -123,10 +129,18 @@ public class Chessboard {
         selectedPaint = new Paint();
         selectedPaint.setColor(ContextCompat.getColor(context, R.color.trans_yellow));
 
-        // load rotate pieces setting
-        rotatePieces = PreferenceManager
+        redPaint = new Paint();
+        redPaint.setColor(ContextCompat.getColor(context, R.color.trans_red));
+        greenPaint = new Paint();
+        greenPaint.setColor(ContextCompat.getColor(context, R.color.trans_green));
+
+        // load settings
+        doRotatePieces = PreferenceManager
                 .getDefaultSharedPreferences(context)
-                .getBoolean(context.getString(R.string.rotate_pieces), true);
+                .getBoolean(context.getString(R.string.setting_rotate_pieces), true);
+        doShowAttackInfo = PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.setting_show_attack_info), false);
 
         // load drawables for move options drawing
         moveBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.move);
@@ -151,7 +165,7 @@ public class Chessboard {
     }
 
     private boolean isNeedRotate() {
-        return rotatePieces && ai == 0 && state.playerToMove == -1;
+        return doRotatePieces && ai == 0 && state.playerToMove == -1;
     }
 
     public void draw(Canvas canvas) {
@@ -187,15 +201,38 @@ public class Chessboard {
                 }
             }
         }
+
+        // draw attacking areas and being attacked by which
+        if (doShowAttackInfo && infoX != -1) {
+            if (state.attacking[infoY][infoX] != null) {
+                for (int[] attackBlock : state.attacking[infoY][infoX]) {
+                    block.offsetTo(blockSize * attackBlock[2], blockSize * attackBlock[3]);
+                    canvas.drawRect(block, greenPaint);
+                }
+            }
+            for (List<Integer> attacker : state.underAttackByW[infoY][infoX]) {
+                block.offsetTo(blockSize * attacker.get(0), blockSize * attacker.get(1));
+                canvas.drawRect(block, redPaint);
+            }
+            for (List<Integer> attacker : state.underAttackByB[infoY][infoX]) {
+                block.offsetTo(blockSize * attacker.get(0), blockSize * attacker.get(1));
+                canvas.drawRect(block, redPaint);
+            }
+        }
+
     }
 
     /*============================================================================================*/
     /* making moves */
 
     private void deselect() {
-        Log.d("AI", "deselect: " + selectedX + ", " + selectedY);
         selectedX = -1;
+        selectedY = -1;
         moveList = null;
+
+        // for drawing attack info
+        infoX = -1;
+        infoY = -1;
     }
 
     private boolean isValidMove(int xEnd, int yEnd) {
@@ -233,6 +270,15 @@ public class Chessboard {
         int y = (int) yPix / blockSize;
 
         if (x >= width || y >= height) return;  // clicking outside of the board
+
+        // for drawing attack info
+        if (infoX == x && infoY == y) {
+            infoX = -1;
+            infoY = -1;
+        } else {
+            infoX = x;
+            infoY = y;
+        }
 
         Piece piece = state.board[y][x];
         if (selectedX == x && selectedY == y) { // deselect

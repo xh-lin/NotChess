@@ -18,8 +18,8 @@ public class LevelActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_level);
 
-        level = getIntent().getExtras().getInt(getResources().getString(R.string.level_selected));
-        aiOption = getIntent().getExtras().getInt(getResources().getString(R.string.ai_option));
+        level = getIntent().getExtras().getInt(getResources().getString(R.string.start_level));
+        aiOption = getIntent().getExtras().getInt(getResources().getString(R.string.start_ai_option));
 
         chessBoardView = new GameView(this);
         replaceView(findViewById(R.id.boardView), chessBoardView);

@@ -243,10 +243,12 @@ public enum Piece {
 
                 // special move: castling
                 // check on the same axis of 4 directions
-                addCastlingMoves(moves, state, xStart, yStart, 0, -1);  // up
-                addCastlingMoves(moves, state, xStart, yStart, 0, 1);   // down
-                addCastlingMoves(moves, state, xStart, yStart, -1, 0);  // left
-                addCastlingMoves(moves, state, xStart, yStart, 1, 0);   // right
+                if (!getAttacks) {
+                    addCastlingMoves(moves, state, xStart, yStart, 0, -1);  // up
+                    addCastlingMoves(moves, state, xStart, yStart, 0, 1);   // down
+                    addCastlingMoves(moves, state, xStart, yStart, -1, 0);  // left
+                    addCastlingMoves(moves, state, xStart, yStart, 1, 0);   // right
+                }
                 break;
 
             case W_Queen:

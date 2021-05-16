@@ -43,8 +43,8 @@ public class NavigationActivity extends FragmentActivity {
 
     public void startLevel(View view) {
         Intent intent = new Intent(this, LevelActivity.class);
-        intent.putExtra(this.getString(R.string.level_selected), level);
-        intent.putExtra(this.getString(R.string.ai_option), aiOption);
+        intent.putExtra(this.getString(R.string.start_level), level);
+        intent.putExtra(this.getString(R.string.start_ai_option), aiOption);
         startActivity(intent);
     }
 

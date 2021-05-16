@@ -71,56 +71,14 @@ public class GameState {
         attacking = new ArrayList[height][width];
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
-                Piece piece = board[y][x];
-                if (piece != null)
-                    addAttacking(x, y, piece.isBelongingTo(1) ? underAttackByW : underAttackByB);
+                addAttacking(x, y);
             }
         }
     }
 
-    public boolean isUnderAttackBy(int player, int x, int y) {
-        return (player == 1 ? underAttackByW : underAttackByB)[y][x].size() != 0;
-    }
-
-    private void addAttacking(int x, int y, HashSet<List<Integer>>[][] attacked) {
-        // add new attacking info
-        attacking[y][x] = board[y][x].getMoveOptions(this, x, y, true);
-        for (int[] attackBlock : attacking[y][x]) {
-            int xEnd = attackBlock[2];
-            int yEnd = attackBlock[3];
-            attacked[yEnd][xEnd].add(Arrays.asList(x, y));
-        }
-    }
-
-    private void removeAttacking(int x, int y, HashSet<List<Integer>>[][] attacked) {
-        // remove old attacking info
-        if (attacking[y][x] != null) {  // need to check b/c null when initializing
-            for (int[] attackBlock : attacking[y][x]) {
-                int xEnd = attackBlock[2];
-                int yEnd = attackBlock[3];
-                attacked[yEnd][xEnd].remove(Arrays.asList(x, y));
-            }
-        }
-        attacking[y][x] = null;
-    }
-
-//    private void updateUnderAttack(int x, int y) {
-//        for (List<Integer> attacker : underAttackByW[y][x]) {
-//            addAttacking(attacker.get(0), attacker.get(1), underAttackByW);
-//        }
-//        for (List<Integer> attacker : underAttackByB[y][x]) {
-//            addAttacking(attacker.get(0), attacker.get(1), underAttackByB);
-//
-//    }
-
-    public void updateAttacking(int xBefore, int yBefore, int xNow, int yNow) {
-        boolean w = board[yNow][xNow].isBelongingTo(1);
-        boolean kicked = attacking[yNow][xNow] != null; // already has info indicates kicked a piece
-
-        removeAttacking(xBefore, yBefore, w ? underAttackByW : underAttackByB); // clean info in old location
-        if (kicked) // clean old info in new location if kicked a piece
-            removeAttacking(xNow, yNow, !w ? underAttackByW : underAttackByB);
-        addAttacking(xNow, yNow, w ? underAttackByW : underAttackByB);  // update info in new location
+    @NonNull
+    public GameState clone() {
+        return new GameState(board, wPieceCount, bPieceCount, isMoved, lastMove, playerToMove);
     }
 
     public boolean isGameOver() {
@@ -128,7 +86,7 @@ public class GameState {
     }
 
     public int checkWinner() {
-        if (winner != 0)
+        if (isGameOver())
             return winner;
         if (wPieceCount[1] == 0 && (wPieceCount[0] == 0 || wPieceCount[2] == 0)) {
             winner = -1;
@@ -138,9 +96,56 @@ public class GameState {
         return winner;
     }
 
-    @NonNull
-    public GameState clone() {
-        return new GameState(board, wPieceCount, bPieceCount, isMoved, lastMove, playerToMove);
+    /*============================================================================================*/
+    /* move */
+
+    public boolean isUnderAttackBy(int player, int x, int y) {
+        return (player == 1 ? underAttackByW : underAttackByB)[y][x].size() != 0;
+    }
+
+    private void addAttacking(int x, int y) {
+        Piece piece = board[y][x];
+        if (piece != null) {
+            HashSet<List<Integer>>[][] attacked = piece.isBelongingTo(1) ?
+                    underAttackByW : underAttackByB;
+            attacking[y][x] = piece.getMoveOptions(this, x, y, true);
+            for (int[] attackBlock : attacking[y][x]) {
+                int xEnd = attackBlock[2];
+                int yEnd = attackBlock[3];
+                attacked[yEnd][xEnd].add(Arrays.asList(x, y));
+            }
+        }
+    }
+
+    private void removeAttacking(int x, int y) {
+        if (attacking[y][x] != null) {
+            for (int[] attackBlock : attacking[y][x]) {
+                int xEnd = attackBlock[2];
+                int yEnd = attackBlock[3];
+                underAttackByW[yEnd][xEnd].remove(Arrays.asList(x, y));
+                underAttackByB[yEnd][xEnd].remove(Arrays.asList(x, y));
+            }
+        }
+        attacking[y][x] = null;
+    }
+
+    private void addAttackers(HashSet<List<Integer>> attackers, int x, int y) {
+        attackers.addAll(underAttackByW[y][x]);
+        attackers.addAll(underAttackByB[y][x]);
+    }
+
+    // make sure to call this update function AFTER the move is made
+    public void updateAttacking(int xBefore, int yBefore, int xNow, int yNow) {
+        HashSet<List<Integer>> attackers = new HashSet<>(); // attacking positions need to update
+        attackers.add(Arrays.asList(xBefore, yBefore));
+        attackers.add(Arrays.asList(xNow, yNow));
+        addAttackers(attackers, xBefore, yBefore);
+        addAttackers(attackers, xNow, yNow);
+
+        for (List<Integer> attacker : attackers) {
+            removeAttacking(attacker.get(0), attacker.get(1));
+            addAttacking(attacker.get(0), attacker.get(1));
+        }
     }
 
     public void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
