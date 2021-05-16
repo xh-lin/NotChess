@@ -75,31 +75,40 @@ public class GameState {
         }
     }
 
-    public boolean underAttackBy(int player, int x, int y) {
+    public boolean isUnderAttackBy(int player, int x, int y) {
         return (player == 1 ? underAttackByW : underAttackByB)[y][x].size() != 0;
     }
 
-    private void updateAttacking(int xBefore, int yBefore, int xNow, int yNow) {
-        HashSet<List<Integer>>[][] attacked = board[yNow][xNow].isBelongingTo(1) ?
-                underAttackByW : underAttackByB;
-
-        // remove old attacking info
-        if (attacking[yBefore][xBefore] != null) {  // need to check b/c null when initializing
-            for (int[] attackBlock : attacking[yBefore][xBefore]) {
-                int xEnd = attackBlock[2];
-                int yEnd = attackBlock[3];
-                attacked[yEnd][xEnd].remove(Arrays.asList(xBefore, yBefore));
-            }
-        }
-        attacking[yBefore][xBefore] = null;
-
+    private void addAttacking(int x, int y, HashSet<List<Integer>>[][] attacked) {
         // add new attacking info
-        attacking[yNow][xNow] = board[yNow][xNow].getMoveOptions(this, xNow, yNow, true);
-        for (int[] attackBlock : attacking[yNow][xNow]) {
+        attacking[y][x] = board[y][x].getMoveOptions(this, x, y, true);
+        for (int[] attackBlock : attacking[y][x]) {
             int xEnd = attackBlock[2];
             int yEnd = attackBlock[3];
-            attacked[yEnd][xEnd].add(Arrays.asList(xNow, yNow));
+            attacked[yEnd][xEnd].add(Arrays.asList(x, y));
         }
+    }
+
+    private void removeAttacking(int x, int y, HashSet<List<Integer>>[][] attacked) {
+        // remove old attacking info
+        if (attacking[y][x] != null) {  // need to check b/c null when initializing
+            for (int[] attackBlock : attacking[y][x]) {
+                int xEnd = attackBlock[2];
+                int yEnd = attackBlock[3];
+                attacked[yEnd][xEnd].remove(Arrays.asList(x, y));
+            }
+        }
+        attacking[y][x] = null;
+    }
+
+    public void updateAttacking(int xBefore, int yBefore, int xNow, int yNow) {
+        boolean w = board[yNow][xNow].isBelongingTo(1);
+        boolean kicked = attacking[yNow][xNow] != null; // already has info indicates kicked a piece
+
+        removeAttacking(xBefore, yBefore, w ? underAttackByW : underAttackByB);
+        if (kicked)
+            removeAttacking(xNow, yNow, !w ? underAttackByW : underAttackByB);
+        addAttacking(xNow, yNow, w ? underAttackByW : underAttackByB);
     }
 
     public boolean isGameOver() {
@@ -125,8 +134,6 @@ public class GameState {
     public void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
         Piece toMove = board[yStart][xStart];
         Piece kicked = board[yEnd][xEnd];
-
-        lastMove = new int[]{xStart, yStart, xEnd, yEnd};
 
         // make the move
         board[yEnd][xEnd] = toMove;
@@ -174,6 +181,7 @@ public class GameState {
             else bPieceCount[idx] -= 1;
         }
 
+        lastMove = new int[]{xStart, yStart, xEnd, yEnd};
         playerToMove = -playerToMove;   // opponent is the next player to move
         moveCount += 1;
 

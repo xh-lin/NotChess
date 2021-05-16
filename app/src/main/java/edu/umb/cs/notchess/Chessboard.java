@@ -8,11 +8,15 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.math.MathUtils;
+
+import java.time.chrono.MinguoChronology;
 import java.util.ArrayList;
 
 public class Chessboard {
@@ -189,18 +193,9 @@ public class Chessboard {
     /* making moves */
 
     private void deselect() {
+        Log.d("AI", "deselect: " + selectedX + ", " + selectedY);
         selectedX = -1;
         moveList = null;
-    }
-
-    private void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
-        state.makeMove(xStart, yStart, xEnd, yEnd, promote);
-        deselect();
-        updateMoveIndicator();              // update text of telling who's move next
-        checkGameState();                   // check whether game is over
-
-        if (!state.isGameOver() && state.playerToMove == ai)
-            new AIThink().execute();        // execute playerAI if it is the next to move
     }
 
     private boolean isValidMove(int xEnd, int yEnd) {
@@ -213,9 +208,97 @@ public class Chessboard {
         return false;
     }
 
+    private void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
+        state.makeMove(xStart, yStart, xEnd, yEnd, promote);
+        deselect();
+        updateMoveIndicator();              // update text of telling who's move next
+        checkGameState();                   // check whether game is over
+
+        if (!state.isGameOver() && state.playerToMove == ai)
+            new AIThink().execute();        // execute playerAI if it is the next to move
+    }
+
+    private boolean makeCastlingMove(int xKing, int yKing, int xRook, int yRook) {
+        if (xKing != -1) {  // in case of no piece selected
+            final int CASTLING_DIST = 2;
+            Piece king = state.board[yKing][xKing];
+            Piece rook = state.board[yRook][xRook];
+            // if is it a castling attempt and both have not moved ...
+            if (king != null && rook != null
+                    && king.isKing() && rook.isRook()
+                    && !state.isMoved[yKing][xKing] && !state.isMoved[yRook][xRook]) {
+                int xDist = Math.abs(xRook - xKing);
+                int yDist = Math.abs(yRook - yKing);
+                // ... and their distance is far enough and they are on the same axis ...
+                if ((xDist == 0 && yDist >= CASTLING_DIST)
+                        || (xDist >= CASTLING_DIST && yDist == 0)) {
+                    // ... and no pieces in between ...
+                    if (yDist == 0) {   // on x-axis
+                        int lowerX = Math.min(xKing, xRook);
+                        int upperX = Math.max(xKing, xRook);
+                        for (int x = lowerX + 1; x < upperX; x++)   // +1 and < to exclusive both
+                            if (state.board[yKing][x] != null) return false;
+                    } else {            // on y-axis
+                        int lowerY = Math.min(yKing, yRook);
+                        int upperY = Math.max(yKing, yRook);
+                        for (int y = lowerY + 1; y < upperY; y++)
+                            if (state.board[y][xKing] != null) return false;
+                    }
+
+                    int xDir = xRook - xKing;
+                    int yDir = yRook - yKing;
+                    int xKingEnd = xKing + MathUtils.clamp(xDir, -2, 2);
+                    int yKingEnd = yKing + MathUtils.clamp(yDir, -2, 2);
+
+                    // ... and king is not in check and king's path not under attack
+                    if (yDist == 0) {   // on x-axis
+                        int lowerX = Math.min(xKing, xKingEnd);
+                        int upperX = Math.max(xKing, xKingEnd);
+                        for (int x = lowerX; x <= upperX; x++)   // inclusive both end
+                            if (state.isUnderAttackBy(-state.playerToMove, x, yKing)) return false;
+                    } else {            // on y-axis
+                        int lowerY = Math.min(yKing, yKingEnd);
+                        int upperY = Math.max(yKing, yKingEnd);
+                        for (int y = lowerY; y <= upperY; y++)
+                            if (state.isUnderAttackBy(-state.playerToMove, xKing, y)) return false;
+                    }
+
+                    int xRookEnd = xKing + MathUtils.clamp(xDir, -1, 1);
+                    int yRookEnd = yKing + MathUtils.clamp(yDir, -1, 1);
+
+                    // eligible for castling, so make the move
+                    state.board[yKingEnd][xKingEnd] = state.board[yKing][xKing];
+                    state.board[yKing][xKing] = null;
+                    state.board[yRookEnd][xRookEnd] = state.board[yRook][xRook];
+                    state.board[yRook][xRook] = null;
+
+                    state.isMoved[yKing][xKing] = true;
+                    state.isMoved[yKingEnd][xKingEnd] = true;
+                    state.isMoved[yRook][xRook] = true;
+                    state.isMoved[yRookEnd][xRookEnd] = true;
+
+                    state.lastMove = new int[]{xKing, yKing, xKingEnd, yKingEnd};
+                    state.playerToMove = -state.playerToMove;
+                    state.moveCount += 1;
+
+                    state.updateAttacking(xKing, yKing, xKingEnd, yKingEnd);
+                    state.updateAttacking(xRook, yRook, xRookEnd, yRookEnd);
+
+                    deselect();
+                    updateMoveIndicator();              // update text of telling who's move next
+
+                    if (!state.isGameOver() && state.playerToMove == ai)
+                        new AIThink().execute();        // execute playerAI if it is the next to move
+
+                    return true;    // castling successful, tell select() not to select
+                }
+            }
+        }
+
+        return false;   // not a castling move or not eligible, tell select() to select
+    }
+
     public void makePromotionMove(int promote) {
-        View promotionView = state.playerToMove == 1 ? wPromotionView : bPromotionView;
-        promotionView.setVisibility(View.INVISIBLE);        // close promotion menu
         makeMove(promoteMove[0], promoteMove[1], promoteMove[2], promoteMove[3], promote);
         gameView.invalidate();
     }
@@ -233,9 +316,11 @@ public class Chessboard {
         if (selectedX == x && selectedY == y) { // deselect
             deselect();
         } else if (piece != null && piece.isBelongingTo(state.playerToMove) && state.playerToMove != ai) {
-            selectedX = x;  // player selects a piece
-            selectedY = y;
-            moveList = piece.getMoveOptions(state, x, y, false);
+            if (!makeCastlingMove(selectedX, selectedY, x, y)) {
+                selectedX = x;  // player selects a piece
+                selectedY = y;
+                moveList = piece.getMoveOptions(state, x, y, false);
+            }
         } else if (isValidMove(x, y)) {    // player makes a move
             Piece selectedPiece = state.board[selectedY][selectedX];
             if (selectedPiece.isPromotion(state.board, x, y)) {

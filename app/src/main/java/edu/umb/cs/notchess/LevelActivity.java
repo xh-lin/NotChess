@@ -40,12 +40,13 @@ public class LevelActivity extends Activity {
     // selected one of the promotion options
     public void selectPromotion(View view) {
         int promote = Integer.parseInt(view.getTag().toString());
+        ((View) view.getParent().getParent()).setVisibility(View.INVISIBLE);    // close promotion menu
         chessBoardView.mChessboard.makePromotionMove(promote);
     }
 
     public void resetBoard(View view) {
         chessBoardView.mChessboard.resetState();
-        ((View) view.getParent().getParent()).setVisibility(View.INVISIBLE);    // hide dialog
+        ((View) view.getParent().getParent()).setVisibility(View.INVISIBLE);    // close dialog
     }
 
     public void closeActivity(View view) {
