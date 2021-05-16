@@ -3,6 +3,8 @@ package edu.umb.cs.notchess;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.math.MathUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -101,14 +103,23 @@ public class GameState {
         attacking[y][x] = null;
     }
 
+//    private void updateUnderAttack(int x, int y) {
+//        for (List<Integer> attacker : underAttackByW[y][x]) {
+//            addAttacking(attacker.get(0), attacker.get(1), underAttackByW);
+//        }
+//        for (List<Integer> attacker : underAttackByB[y][x]) {
+//            addAttacking(attacker.get(0), attacker.get(1), underAttackByB);
+//
+//    }
+
     public void updateAttacking(int xBefore, int yBefore, int xNow, int yNow) {
         boolean w = board[yNow][xNow].isBelongingTo(1);
         boolean kicked = attacking[yNow][xNow] != null; // already has info indicates kicked a piece
 
-        removeAttacking(xBefore, yBefore, w ? underAttackByW : underAttackByB);
-        if (kicked)
+        removeAttacking(xBefore, yBefore, w ? underAttackByW : underAttackByB); // clean info in old location
+        if (kicked) // clean old info in new location if kicked a piece
             removeAttacking(xNow, yNow, !w ? underAttackByW : underAttackByB);
-        addAttacking(xNow, yNow, w ? underAttackByW : underAttackByB);
+        addAttacking(xNow, yNow, w ? underAttackByW : underAttackByB);  // update info in new location
     }
 
     public boolean isGameOver() {
@@ -135,56 +146,86 @@ public class GameState {
         Piece toMove = board[yStart][xStart];
         Piece kicked = board[yEnd][xEnd];
 
-        // make the move
-        board[yEnd][xEnd] = toMove;
-        board[yStart][xStart] = null;
+        if (toMove != null && kicked != null
+                && toMove.isFriendlyWith(kicked) && toMove.isKing() && kicked.isRook()) {  // castling
+            int xKing = xStart, yKing = yStart, xRook = xEnd, yRook = yEnd;
+            int xDir = xRook - xKing;
+            int yDir = yRook - yKing;
+            int xKingEnd = xKing + MathUtils.clamp(xDir, -2, 2);
+            int yKingEnd = yKing + MathUtils.clamp(yDir, -2, 2);
+            int xRookEnd = xKing + MathUtils.clamp(xDir, -1, 1);
+            int yRookEnd = yKing + MathUtils.clamp(yDir, -1, 1);
 
-        isMoved[yStart][xStart] = true;
-        isMoved[yEnd][xEnd] = true;
+            board[yKingEnd][xKingEnd] = board[yKing][xKing];
+            board[yKing][xKing] = null;
+            board[yRookEnd][xRookEnd] = board[yRook][xRook];
+            board[yRook][xRook] = null;
 
-        // special move: en passant (in passing)
-        if (kicked == null && toMove.isPawn()) {
-            int[] pawnsForward = toMove.getPawnForward();
-            int xBehind = xEnd - pawnsForward[0];
-            int yBehind = yEnd - pawnsForward[1];
-            Piece pieceBehind = board[yBehind][xBehind];
-            if (pieceBehind != null && pieceBehind.isPawn()) {      // if it was en passant move
-                kicked = pieceBehind;
-                board[yBehind][xBehind] = null;
-            }
-        }
+            isMoved[yKing][xKing] = true;
+            isMoved[yKingEnd][xKingEnd] = true;
+            isMoved[yRook][xRook] = true;
+            isMoved[yRookEnd][xRookEnd] = true;
 
-        // special move: promotion
-        // promote: None(-1), Queen(0), Bishop(1), Knight(2), Rook(3)
-        if (promote >= 0 && promote <= 3 && toMove.isPawn()) {
-            boolean w = toMove.isBelongingTo(1);
-            switch(promote) {
-                case 0:
-                    toMove = w ? W_Queen : B_Queen;
-                    break;
-                case 1:
-                    toMove = w ? W_Bishop : B_Bishop;
-                    break;
-                case 2:
-                    toMove = w ? W_Knight : B_Knight;
-                    break;
-                case 3:
-                    toMove = w ? W_Rook : B_Rook;
-            }
+            lastMove = new int[]{xKing, yKing, xKingEnd, yKingEnd};
+            playerToMove = -playerToMove;
+            moveCount += 1;
+
+            updateAttacking(xKing, yKing, xKingEnd, yKingEnd);
+            updateAttacking(xRook, yRook, xRookEnd, yRookEnd);
+        } else {
+            // make the move
             board[yEnd][xEnd] = toMove;
+            board[yStart][xStart] = null;
+
+            isMoved[yStart][xStart] = true;
+            isMoved[yEnd][xEnd] = true;
+
+            // special move: en passant (in passing)
+            if (kicked == null && toMove.isPawn()) {
+                int[] pawnsForward = toMove.getPawnForward();
+                int xBehind = xEnd - pawnsForward[0];
+                int yBehind = yEnd - pawnsForward[1];
+                Piece pieceBehind = board[yBehind][xBehind];
+                if (pieceBehind != null && pieceBehind.isPawn()) {      // if it was en passant move
+                    kicked = pieceBehind;
+                    board[yBehind][xBehind] = null;
+                }
+            }
+
+            // special move: promotion
+            // promote: None(-1), Queen(0), Bishop(1), Knight(2), Rook(3)
+            if (promote >= 0 && promote <= 3 && toMove.isPawn()) {
+                boolean w = toMove.isBelongingTo(1);
+                switch(promote) {
+                    case 0:
+                        toMove = w ? W_Queen : B_Queen;
+                        break;
+                    case 1:
+                        toMove = w ? W_Bishop : B_Bishop;
+                        break;
+                    case 2:
+                        toMove = w ? W_Knight : B_Knight;
+                        break;
+                    case 3:
+                        toMove = w ? W_Rook : B_Rook;
+                }
+                board[yEnd][xEnd] = toMove;
+            }
+
+            // count the number of pieces left
+            if (kicked != null) {
+                int idx = kicked.isHeart() ? 0 : kicked.isKing() ? 1 : 2;
+                if (kicked.isBelongingTo(1)) wPieceCount[idx] -= 1;
+                else bPieceCount[idx] -= 1;
+            }
+
+            lastMove = new int[]{xStart, yStart, xEnd, yEnd};
+            playerToMove = -playerToMove;   // opponent is the next player to move
+            moveCount += 1;
+
+            updateAttacking(xStart, yStart, xEnd, yEnd);
         }
 
-        // count the number of pieces left
-        if (kicked != null) {
-            int idx = kicked.isHeart() ? 0 : kicked.isKing() ? 1 : 2;
-            if (kicked.isBelongingTo(1)) wPieceCount[idx] -= 1;
-            else bPieceCount[idx] -= 1;
-        }
 
-        lastMove = new int[]{xStart, yStart, xEnd, yEnd};
-        playerToMove = -playerToMove;   // opponent is the next player to move
-        moveCount += 1;
-
-        updateAttacking(xStart, yStart, xEnd, yEnd);
     }
 }

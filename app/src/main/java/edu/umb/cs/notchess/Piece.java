@@ -6,6 +6,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+
+import androidx.core.math.MathUtils;
+
 import java.util.ArrayList;
 
 public enum Piece {
@@ -118,6 +121,17 @@ public enum Piece {
         return pawnMoveDirections[getPawnDirection()][0].clone();
     }
 
+    // check for promotion before adding a move
+    private void addPawnMoves(ArrayList<int[]> moves, Piece[][] board,
+                              int xStart, int yStart, int xEnd, int yEnd, boolean getAttacks) {
+        if (!getAttacks && isPromotion(board, xEnd, yEnd)) {
+            for (int promote = 0; promote <= 3; promote++)  // add move for each the promotion option
+                moves.add(new int[]{xStart, yStart, xEnd, yEnd, promote});
+        } else {    // no promotion if just want to get attacks
+            moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
+        }
+    }
+
     private void addSlideMoves(ArrayList<int[]> moves, Piece[][] board,
                                int xStart, int yStart, int dx, int dy, boolean getAttacks) {
         Piece target;
@@ -130,7 +144,7 @@ public enum Piece {
                 moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                 xEnd += dx;
                 yEnd += dy;
-            } else if (getAttacks || isNotFriendlyWith(target)) {
+            } else if (getAttacks || !isFriendlyWith(target)) {
                 moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                 break;
             } else {    // blocked by a friendly piece
@@ -155,14 +169,74 @@ public enum Piece {
         addSlideMoves(moves, board, xStart, yStart, 1, 0, getAttacks);    // → moves
     }
 
-    // check for promotion before adding a move
-    private void addPawnMoves(ArrayList<int[]> moves, Piece[][] board,
-                              int xStart, int yStart, int xEnd, int yEnd, boolean getAttacks) {
-        if (!getAttacks && isPromotion(board, xEnd, yEnd)) {
-            for (int promote = 0; promote <= 3; promote++)  // add move for each the promotion option
-                moves.add(new int[]{xStart, yStart, xEnd, yEnd, promote});
-        } else {
-            moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
+    private boolean isCastlingEligible(GameState state,
+                                       int xKing, int yKing, int xRook, int yRook) {
+        if (xKing != -1) {  // in case of no piece selected previously
+            final int CASTLING_DIST = 2;
+            Piece king = state.board[yKing][xKing];
+            Piece rook = state.board[yRook][xRook];
+            // if is it a castling attempt and both have not moved ...
+            if (king != null && rook != null
+                    && king.isKing() && rook.isRook()
+                    && !state.isMoved[yKing][xKing] && !state.isMoved[yRook][xRook]) {
+                int xDist = Math.abs(xRook - xKing);
+                int yDist = Math.abs(yRook - yKing);
+                // ... and their distance is far enough and they are on the same axis ...
+                if ((xDist == 0 && yDist >= CASTLING_DIST)
+                        || (xDist >= CASTLING_DIST && yDist == 0)) {
+                    // ... and no pieces in between ...
+                    if (yDist == 0) {   // on x-axis
+                        int lowerX = Math.min(xKing, xRook);
+                        int upperX = Math.max(xKing, xRook);
+                        for (int x = lowerX + 1; x < upperX; x++)   // +1 and < to exclusive both
+                            if (state.board[yKing][x] != null) return false;
+                    } else {            // on y-axis
+                        int lowerY = Math.min(yKing, yRook);
+                        int upperY = Math.max(yKing, yRook);
+                        for (int y = lowerY + 1; y < upperY; y++)
+                            if (state.board[y][xKing] != null) return false;
+                    }
+
+                    int xDir = xRook - xKing;
+                    int yDir = yRook - yKing;
+                    int xKingEnd = xKing + MathUtils.clamp(xDir, -2, 2);
+                    int yKingEnd = yKing + MathUtils.clamp(yDir, -2, 2);
+
+                    // ... and king is not in check and king's path not under attack
+                    if (yDist == 0) {   // on x-axis
+                        int lowerX = Math.min(xKing, xKingEnd);
+                        int upperX = Math.max(xKing, xKingEnd);
+                        for (int x = lowerX; x <= upperX; x++)   // inclusive both end
+                            if (state.isUnderAttackBy(-state.playerToMove, x, yKing)) return false;
+                    } else {            // on y-axis
+                        int lowerY = Math.min(yKing, yKingEnd);
+                        int upperY = Math.max(yKing, yKingEnd);
+                        for (int y = lowerY; y <= upperY; y++)
+                            if (state.isUnderAttackBy(-state.playerToMove, xKing, y)) return false;
+                    }
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void addCastlingMoves(ArrayList<int[]> moves, GameState state,
+                                  int xStart, int yStart, int dx, int dy) {
+        Piece target;
+        int xEnd = xStart + dx;
+        int yEnd = yStart + dy;
+
+        while (isWithinBoard(state.board, xEnd, yEnd)) {
+            target = state.board[yEnd][xEnd];
+            if (target != null) {
+                if (target.isRook() && isCastlingEligible(state, xStart, yStart, xEnd, yEnd))
+                    moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
+                break;
+            }
+            xEnd += dx;
+            yEnd += dy;
         }
     }
 
@@ -176,15 +250,22 @@ public enum Piece {
         switch (this) {
             case W_King:
             case B_King:
+                // one step move options
                 for (int[] dir : kingMoveDirections) {
                     xEnd = xStart + dir[0];
                     yEnd = yStart + dir[1];
                     if (isWithinBoard(state.board, xEnd, yEnd)) {
                         target = state.board[yEnd][xEnd];
-                        if (getAttacks || target == null || isNotFriendlyWith(target))
+                        if (getAttacks || target == null || !isFriendlyWith(target))
                             moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                     }
                 }
+
+                // special move: castling
+                addCastlingMoves(moves, state, xStart, yStart, 0, -1);  // up
+                addCastlingMoves(moves, state, xStart, yStart, 0, 1);   // down
+                addCastlingMoves(moves, state, xStart, yStart, -1, 0);  // left
+                addCastlingMoves(moves, state, xStart, yStart, 1, 0);   // right
                 break;
 
             case W_Queen:
@@ -205,7 +286,7 @@ public enum Piece {
                     yEnd = yStart + dir[1];
                     if (isWithinBoard(state.board, xEnd, yEnd)) {
                         target = state.board[yEnd][xEnd];
-                        if (getAttacks || target == null || isNotFriendlyWith(target))
+                        if (getAttacks || target == null || !isFriendlyWith(target))
                             moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
                     }
                 }
@@ -239,7 +320,7 @@ public enum Piece {
                     yEnd = yStart + pawnMoveDir[i][1];
                     if (isWithinBoard(state.board, xEnd, yEnd)) {
                         target = state.board[yEnd][xEnd];
-                        if (getAttacks || (target != null && isNotFriendlyWith(target)))
+                        if (getAttacks || (target != null && !isFriendlyWith(target)))
                             addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd, getAttacks);
                     }
 
@@ -281,8 +362,8 @@ public enum Piece {
     /*============================================================================================*/
     /* utils */
 
-    private boolean isNotFriendlyWith(Piece target) {
-        return (value > 0 && target.value < 0) || (value < 0 && target.value > 0);
+    public boolean isFriendlyWith(Piece target) {
+        return (value > 0 && target.value > 0) || (value < 0 && target.value < 0);
     }
 
     private boolean isWithinBoard(Piece[][] board, int x, int y) {

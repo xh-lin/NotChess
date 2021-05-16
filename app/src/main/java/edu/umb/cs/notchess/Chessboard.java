@@ -210,6 +210,7 @@ public class Chessboard {
 
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
         state.makeMove(xStart, yStart, xEnd, yEnd, promote);
+
         deselect();
         updateMoveIndicator();              // update text of telling who's move next
         checkGameState();                   // check whether game is over
@@ -315,12 +316,6 @@ public class Chessboard {
         Piece piece = state.board[y][x];
         if (selectedX == x && selectedY == y) { // deselect
             deselect();
-        } else if (piece != null && piece.isBelongingTo(state.playerToMove) && state.playerToMove != ai) {
-            if (!makeCastlingMove(selectedX, selectedY, x, y)) {
-                selectedX = x;  // player selects a piece
-                selectedY = y;
-                moveList = piece.getMoveOptions(state, x, y, false);
-            }
         } else if (isValidMove(x, y)) {    // player makes a move
             Piece selectedPiece = state.board[selectedY][selectedX];
             if (selectedPiece.isPromotion(state.board, x, y)) {
@@ -329,6 +324,10 @@ public class Chessboard {
             } else {
                 makeMove(selectedX, selectedY, x, y, -1);
             }
+        } else if (piece != null && piece.isBelongingTo(state.playerToMove) && state.playerToMove != ai) {
+            selectedX = x;  // player selects a piece
+            selectedY = y;
+            moveList = piece.getMoveOptions(state, x, y, false);
         }
     }
 
