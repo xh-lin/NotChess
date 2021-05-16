@@ -343,6 +343,7 @@ public class Chessboard {
         View promotionView = state.playerToMove == 1 ? wPromotionView : bPromotionView;
         promotionView.bringToFront();
         promotionView.setVisibility(View.VISIBLE);
+        promotionView.setRotation(isNeedRotate() ? 180 : 0);
     }
 
     /*============================================================================================*/
