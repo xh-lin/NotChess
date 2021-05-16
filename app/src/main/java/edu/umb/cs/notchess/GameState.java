@@ -71,8 +71,9 @@ public class GameState {
         attacking = new ArrayList[height][width];
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
-                if (board[y][x] != null)
-                    updateAttacking(x, y, x, y);
+                Piece piece = board[y][x];
+                if (piece != null)
+                    addAttacking(x, y, piece.isBelongingTo(1) ? underAttackByW : underAttackByB);
             }
         }
     }
@@ -146,34 +147,33 @@ public class GameState {
         Piece toMove = board[yStart][xStart];
         Piece kicked = board[yEnd][xEnd];
 
-        if (toMove != null && kicked != null
-                && toMove.isFriendlyWith(kicked) && toMove.isKing() && kicked.isRook()) {  // castling
-            int xKing = xStart, yKing = yStart, xRook = xEnd, yRook = yEnd;
-            int xDir = xRook - xKing;
-            int yDir = yRook - yKing;
-            int xKingEnd = xKing + MathUtils.clamp(xDir, -2, 2);
-            int yKingEnd = yKing + MathUtils.clamp(yDir, -2, 2);
-            int xRookEnd = xKing + MathUtils.clamp(xDir, -1, 1);
-            int yRookEnd = yKing + MathUtils.clamp(yDir, -1, 1);
+        assert toMove != null;
 
-            board[yKingEnd][xKingEnd] = board[yKing][xKing];
-            board[yKing][xKing] = null;
-            board[yRookEnd][xRookEnd] = board[yRook][xRook];
-            board[yRook][xRook] = null;
+        if (kicked != null && toMove.isFriendlyWith(kicked)
+                && toMove.isKing() && kicked.isRook()) {
+            // castling
+            int xDir = xEnd - xStart;
+            int yDir = yEnd - yStart;
+            int xKingEnd = xStart + MathUtils.clamp(xDir, -2, 2);
+            int yKingEnd = yStart + MathUtils.clamp(yDir, -2, 2);
+            int xRookEnd = xStart + MathUtils.clamp(xDir, -1, 1);
+            int yRookEnd = yStart + MathUtils.clamp(yDir, -1, 1);
 
-            isMoved[yKing][xKing] = true;
+            board[yKingEnd][xKingEnd] = board[yStart][xStart];
+            board[yStart][xStart] = null;
+            board[yRookEnd][xRookEnd] = board[yEnd][xEnd];
+            board[yEnd][xEnd] = null;
+
+            isMoved[yStart][xStart] = true;
             isMoved[yKingEnd][xKingEnd] = true;
-            isMoved[yRook][xRook] = true;
+            isMoved[yEnd][xEnd] = true;
             isMoved[yRookEnd][xRookEnd] = true;
 
-            lastMove = new int[]{xKing, yKing, xKingEnd, yKingEnd};
-            playerToMove = -playerToMove;
-            moveCount += 1;
+            lastMove = new int[]{xStart, yStart, xKingEnd, yKingEnd};
 
-            updateAttacking(xKing, yKing, xKingEnd, yKingEnd);
-            updateAttacking(xRook, yRook, xRookEnd, yRookEnd);
-        } else {
-            // make the move
+            updateAttacking(xStart, yStart, xKingEnd, yKingEnd);
+            updateAttacking(xEnd, yEnd, xRookEnd, yRookEnd);
+        } else {    // make a move
             board[yEnd][xEnd] = toMove;
             board[yStart][xStart] = null;
 
@@ -220,12 +220,11 @@ public class GameState {
             }
 
             lastMove = new int[]{xStart, yStart, xEnd, yEnd};
-            playerToMove = -playerToMove;   // opponent is the next player to move
-            moveCount += 1;
 
             updateAttacking(xStart, yStart, xEnd, yEnd);
         }
 
-
+        playerToMove = -playerToMove;   // opponent is the next player to move
+        moveCount += 1;
     }
 }

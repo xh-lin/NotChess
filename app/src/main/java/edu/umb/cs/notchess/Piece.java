@@ -169,53 +169,33 @@ public enum Piece {
         addSlideMoves(moves, board, xStart, yStart, 1, 0, getAttacks);    // → moves
     }
 
+    // make sure both are king and rook on the same axis, and no pieces in between
     private boolean isCastlingEligible(GameState state,
                                        int xKing, int yKing, int xRook, int yRook) {
-        if (xKing != -1) {  // in case of no piece selected previously
-            final int CASTLING_DIST = 2;
-            Piece king = state.board[yKing][xKing];
-            Piece rook = state.board[yRook][xRook];
-            // if is it a castling attempt and both have not moved ...
-            if (king != null && rook != null
-                    && king.isKing() && rook.isRook()
-                    && !state.isMoved[yKing][xKing] && !state.isMoved[yRook][xRook]) {
-                int xDist = Math.abs(xRook - xKing);
-                int yDist = Math.abs(yRook - yKing);
-                // ... and their distance is far enough and they are on the same axis ...
-                if ((xDist == 0 && yDist >= CASTLING_DIST)
-                        || (xDist >= CASTLING_DIST && yDist == 0)) {
-                    // ... and no pieces in between ...
-                    if (yDist == 0) {   // on x-axis
-                        int lowerX = Math.min(xKing, xRook);
-                        int upperX = Math.max(xKing, xRook);
-                        for (int x = lowerX + 1; x < upperX; x++)   // +1 and < to exclusive both
-                            if (state.board[yKing][x] != null) return false;
-                    } else {            // on y-axis
-                        int lowerY = Math.min(yKing, yRook);
-                        int upperY = Math.max(yKing, yRook);
-                        for (int y = lowerY + 1; y < upperY; y++)
-                            if (state.board[y][xKing] != null) return false;
-                    }
+        final int CASTLING_DIST = 2;
+        // if both king and rook have not moved ...
+        if (!state.isMoved[yKing][xKing] && !state.isMoved[yRook][xRook]) {
+            int xDist = Math.abs(xRook - xKing);
+            int yDist = Math.abs(yRook - yKing);
+            // ... and their distance is far enough ...
+            if (xDist >= CASTLING_DIST || yDist >= CASTLING_DIST) {
+                int xKingEnd = xKing + MathUtils.clamp(xRook - xKing, -2, 2);
+                int yKingEnd = yKing + MathUtils.clamp(yRook - yKing, -2, 2);
 
-                    int xDir = xRook - xKing;
-                    int yDir = yRook - yKing;
-                    int xKingEnd = xKing + MathUtils.clamp(xDir, -2, 2);
-                    int yKingEnd = yKing + MathUtils.clamp(yDir, -2, 2);
-
-                    // ... and king is not in check and king's path not under attack
-                    if (yDist == 0) {   // on x-axis
-                        int lowerX = Math.min(xKing, xKingEnd);
-                        int upperX = Math.max(xKing, xKingEnd);
-                        for (int x = lowerX; x <= upperX; x++)   // inclusive both end
-                            if (state.isUnderAttackBy(-state.playerToMove, x, yKing)) return false;
-                    } else {            // on y-axis
-                        int lowerY = Math.min(yKing, yKingEnd);
-                        int upperY = Math.max(yKing, yKingEnd);
-                        for (int y = lowerY; y <= upperY; y++)
-                            if (state.isUnderAttackBy(-state.playerToMove, xKing, y)) return false;
-                    }
-                    return true;
+                // ... and king is not in check and king's path not under attack
+                if (yDist == 0) {   // on x-axis
+                    int lowerX = Math.min(xKing, xKingEnd);
+                    int upperX = Math.max(xKing, xKingEnd);
+                    for (int x = lowerX; x <= upperX; x++)   // inclusive both end
+                        if (state.isUnderAttackBy(-state.playerToMove, x, yKing)) return false;
+                } else {            // on y-axis
+                    int lowerY = Math.min(yKing, yKingEnd);
+                    int upperY = Math.max(yKing, yKingEnd);
+                    for (int y = lowerY; y <= upperY; y++)
+                        if (state.isUnderAttackBy(-state.playerToMove, xKing, y)) return false;
                 }
+
+                return true;
             }
         }
 
@@ -233,7 +213,7 @@ public enum Piece {
             if (target != null) {
                 if (target.isRook() && isCastlingEligible(state, xStart, yStart, xEnd, yEnd))
                     moves.add(new int[]{xStart, yStart, xEnd, yEnd, -1});
-                break;
+                break;  // break b/c there should be no pieces between king and rook when castling
             }
             xEnd += dx;
             yEnd += dy;
@@ -262,6 +242,7 @@ public enum Piece {
                 }
 
                 // special move: castling
+                // check on the same axis of 4 directions
                 addCastlingMoves(moves, state, xStart, yStart, 0, -1);  // up
                 addCastlingMoves(moves, state, xStart, yStart, 0, 1);   // down
                 addCastlingMoves(moves, state, xStart, yStart, -1, 0);  // left
