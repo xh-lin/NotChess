@@ -22,7 +22,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:onClick="selectPromotion"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:src="@drawable/b_queen"
             android:tag="0" />
 
@@ -31,7 +31,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:onClick="selectPromotion"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:src="@drawable/b_bishop"
             android:tag="1" />
 
@@ -40,7 +40,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:onClick="selectPromotion"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:src="@drawable/b_knight"
             android:tag="2" />
 
@@ -49,7 +49,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:onClick="selectPromotion"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:src="@drawable/b_rook"
             android:tag="3" />
 
