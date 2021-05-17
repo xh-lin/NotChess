@@ -20,12 +20,12 @@ import java.util.List;
 
 public class Chessboard {
     private final Context context;          // context of GameView
-    private final View viewToDraw;            // the View object that draws the chess board
+    private final View viewToDraw;          // the View object that draws the chess board
     private final TextView indicatorView;   // for showing who is the player to move now
     
     private GameState state;
-    private final GameState initState;       // initial game state for reset
-    private final int columns;                // dimension of the chess board
+    private final GameState initState;      // initial game state for reset
+    private final int columns;              // dimension of the chess board
     private final int rows;
 
     /* for drawing */
