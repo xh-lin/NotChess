@@ -1,6 +1,7 @@
 package edu.umb.cs.notchess;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -66,8 +67,12 @@ public class Chessboard {
 
     public Chessboard(Context context, View gameView) {
         LevelActivity levelActivity = ((LevelActivity) context);
-        int level = levelActivity.level;        // index of Levels.boards
-        int aiOption = levelActivity.aiOption;  // spinner items: 0 -> disable, 1 -> Black, 2 -> White
+        SharedPreferences prefs = context.getSharedPreferences(
+                context.getString(R.string.app_name), Context.MODE_PRIVATE);
+        // index of Levels.boards
+        int level = prefs.getInt(context.getString(R.string.start_level), -1);
+        // spinner items: 0 -> disable, 1 -> Black, 2 -> White
+        int aiOption = prefs.getInt(context.getString(R.string.start_ai_option), -1);
 
         this.context = context;
         this.gameView = gameView;

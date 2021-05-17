@@ -9,17 +9,12 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class LevelActivity extends Activity {
-    public int level;
-    public int aiOption;
     public GameView chessBoardView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_level);
-
-        level = getIntent().getExtras().getInt(getResources().getString(R.string.start_level));
-        aiOption = getIntent().getExtras().getInt(getResources().getString(R.string.start_ai_option));
 
         chessBoardView = new GameView(this);
         replaceView(findViewById(R.id.boardView), chessBoardView);
@@ -44,6 +39,7 @@ public class LevelActivity extends Activity {
         chessBoardView.mChessboard.makePromotionMove(promote);
     }
 
+    // callback function of game reset button
     public void resetBoard(View view) {
         chessBoardView.mChessboard.resetState();
         ((View) view.getParent().getParent()).setVisibility(View.INVISIBLE);    // close dialog

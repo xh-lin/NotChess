@@ -2,6 +2,7 @@ package edu.umb.cs.notchess;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,9 +44,13 @@ public class NavigationActivity extends FragmentActivity {
 
     public void startLevel(View view) {
         Intent intent = new Intent(this, LevelActivity.class);
-        intent.putExtra(this.getString(R.string.start_level), level);
-        intent.putExtra(this.getString(R.string.start_ai_option), aiOption);
         startActivity(intent);
+
+        SharedPreferences.Editor editor = getSharedPreferences(
+                getString(R.string.app_name), MODE_PRIVATE).edit();
+        editor.putInt(getString(R.string.start_level), level);
+        editor.putInt(getString(R.string.start_ai_option), aiOption);
+        editor.apply();
     }
 
     private void setLevel(int level) {
@@ -100,31 +105,28 @@ public class NavigationActivity extends FragmentActivity {
             gridView.setAdapter(adapter);
 
             // handle selecting level buttons
-            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    if (level != i) {
-                        level = i;
-                        ((NavigationActivity) Objects.requireNonNull(getActivity())).setLevel(level);   // set level
+            gridView.setOnItemClickListener((adapterView, view, i, l) -> {
+                if (level != i) {
+                    level = i;
+                    ((NavigationActivity) getActivity()).setLevel(level);   // set level
 
-                        levelNameTextView.setText(Levels.titles[i]);    // set title name
-                        view.setBackgroundColor(getResources().getColor(R.color.purple_500));   // set selected color
+                    levelNameTextView.setText(Levels.titles[i]);    // set title name
+                    view.setBackgroundColor(getResources().getColor(R.color.purple_500));   // set selected color
 
-                        if (lastView != null)
-                            lastView.setBackgroundColor(getResources().getColor(R.color.purple_200));
-                        lastView = view;
+                    if (lastView != null)
+                        lastView.setBackgroundColor(getResources().getColor(R.color.purple_200));
+                    lastView = view;
 
-                        if (!startLevelButton.isEnabled())
-                            startLevelButton.setEnabled(true);
-                    } else {    // deselect
-                        level = -1;
+                    if (!startLevelButton.isEnabled())
+                        startLevelButton.setEnabled(true);
+                } else {    // deselect
+                    level = -1;
 
-                        levelNameTextView.setText("");
-                        view.setBackgroundColor(getResources().getColor(R.color.purple_200));
-                        lastView = null;
+                    levelNameTextView.setText("");
+                    view.setBackgroundColor(getResources().getColor(R.color.purple_200));
+                    lastView = null;
 
-                        startLevelButton.setEnabled(false);
-                    }
+                    startLevelButton.setEnabled(false);
                 }
             });
 
