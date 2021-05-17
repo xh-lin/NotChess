@@ -28,24 +28,24 @@ public class LevelActivity extends Activity {
     }
 
     // close promotion menu
-    public void hideView(View view) {
+    public void onClickHideView(View view) {
         view.setVisibility(View.INVISIBLE);
     }
 
     // selected one of the promotion options
-    public void selectPromotion(View view) {
+    public void onClickPromotion(View view) {
         int promote = Integer.parseInt(view.getTag().toString());
         ((View) view.getParent().getParent()).setVisibility(View.INVISIBLE);    // close promotion menu
         chessBoardView.mChessboard.makePromotionMove(promote);
     }
 
     // callback function of game reset button
-    public void resetBoard(View view) {
+    public void onClickResetBoard(View view) {
         chessBoardView.mChessboard.resetState();
         ((View) view.getParent().getParent()).setVisibility(View.INVISIBLE);    // close dialog
     }
 
-    public void closeActivity(View view) {
+    public void onClickCloseActivity(View view) {
         finish();
     }
 }

@@ -53,7 +53,7 @@
             android:id="@+id/startLevelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="startLevel"
+            android:onClick="onClickStartLevel"
             android:text="@string/start" />
 
     </LinearLayout>

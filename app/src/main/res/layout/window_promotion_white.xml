@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:onClick="hideView"
+    android:onClick="onClickHideView"
     android:background="@color/trans_grey">
 
     <LinearLayout
@@ -21,7 +21,7 @@
             android:id="@+id/imageButton"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:onClick="selectPromotion"
+            android:onClick="onClickPromotion"
             android:scaleType="fitCenter"
             android:src="@drawable/w_queen"
             android:tag="0" />
@@ -30,7 +30,7 @@
             android:id="@+id/imageButton2"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:onClick="selectPromotion"
+            android:onClick="onClickPromotion"
             android:scaleType="fitCenter"
             android:src="@drawable/w_bishop"
             android:tag="1" />
@@ -39,7 +39,7 @@
             android:id="@+id/imageButton3"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:onClick="selectPromotion"
+            android:onClick="onClickPromotion"
             android:scaleType="fitCenter"
             android:src="@drawable/w_knight"
             android:tag="2" />
@@ -48,7 +48,7 @@
             android:id="@+id/imageButton4"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:onClick="selectPromotion"
+            android:onClick="onClickPromotion"
             android:scaleType="fitCenter"
             android:src="@drawable/w_rook"
             android:tag="3" />

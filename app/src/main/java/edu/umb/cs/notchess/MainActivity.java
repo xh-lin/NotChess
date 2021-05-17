@@ -15,12 +15,12 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
     }
 
-    public void gameStartActivity(View view) {
+    public void onClickStartGame(View view) {
         Intent intent = new Intent(this, NavigationActivity.class);
         startActivity(intent);
     }
 
-    public void settingsDialog(View view) {
+    public void onClickSettings(View view) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
