@@ -170,7 +170,7 @@ public class Chessboard {
         return doRotatePieces && ai == 0 && state.playerToMove == -1;
     }
 
-    public void draw(Canvas canvas) {
+    public void onDraw(Canvas canvas) {
         boolean white;
         for (int x = 0; x < width; x++) {
             white = x % 2 == 0;
