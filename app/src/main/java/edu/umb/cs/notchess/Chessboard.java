@@ -9,21 +9,18 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.math.MathUtils;
 
-import java.time.chrono.MinguoChronology;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Chessboard {
     private final Context context;          // context of GameView
-    private final View gameView;            // the GameView object that draws the chess board
+    private final View viewToDraw;            // the View object that draws the chess board
     private final TextView indicatorView;   // for showing who is the player to move now
     
     private GameState state;
@@ -65,7 +62,7 @@ public class Chessboard {
     private int ai = 0;                     // 1 -> White, -1 -> Black, 0 -> disable
 
 
-    public Chessboard(Context context, View gameView) {
+    public Chessboard(Context context, View viewToDraw) {
         LevelActivity levelActivity = ((LevelActivity) context);
         SharedPreferences prefs = context.getSharedPreferences(
                 context.getString(R.string.app_name), Context.MODE_PRIVATE);
@@ -75,7 +72,7 @@ public class Chessboard {
         int aiOption = prefs.getInt(context.getString(R.string.start_ai_option), -1);
 
         this.context = context;
-        this.gameView = gameView;
+        this.viewToDraw = viewToDraw;
         indicatorView = levelActivity.findViewById(R.id.indicatorView);
 
         // load View objects for pawn promotion
@@ -264,7 +261,7 @@ public class Chessboard {
     // called by user selecting one of the options on the promotion menu
     public void makePromotionMove(int promote) {
         makeMove(promoteMove[0], promoteMove[1], promoteMove[2], promoteMove[3], promote);
-        gameView.invalidate();
+        viewToDraw.invalidate();
     }
 
     // handles player action of selecting and making moves
@@ -309,7 +306,7 @@ public class Chessboard {
     public void resetState() {
         state = initState.clone();
         state.playerToMove = 1;
-        gameView.invalidate();
+        viewToDraw.invalidate();
         updateMoveIndicator();
 
         if (ai == state.playerToMove)
@@ -365,7 +362,7 @@ public class Chessboard {
         protected void onPostExecute(int[] move) {
             super.onPostExecute(move);
             makeMove(move[0], move[1], move[2], move[3], move[4]);
-            gameView.invalidate();  // update canvas
+            viewToDraw.invalidate();  // update canvas
         }
     }
 
