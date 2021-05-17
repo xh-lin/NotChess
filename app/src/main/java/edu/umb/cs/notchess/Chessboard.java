@@ -25,8 +25,8 @@ public class Chessboard {
     
     private GameState state;
     private final GameState initState;       // initial game state for reset
-    private final int width;                // dimension of the chess board
-    private final int height;
+    private final int columns;                // dimension of the chess board
+    private final int rows;
 
     /* for drawing */
 
@@ -95,8 +95,8 @@ public class Chessboard {
 
         // preparing the game state
         Piece[][] board = Levels.boards[level]; // load the chess board by index
-        width = board[0].length;           // get dimension
-        height = board.length;
+        columns = board[0].length;           // get dimension
+        rows = board.length;
 
         // count the number of pieces for determining whether game is over
         int[] wPieceCount = new int[]{0, 0, 0};     // {Hearts, Kings, others}
@@ -161,7 +161,7 @@ public class Chessboard {
 
     // being called by GameView.onSizeChanged() to get the dimension of the View object
     public void onSizeChanged(int w, int h) {
-        int newBlockSize = Math.min(w/width, h/height);
+        int newBlockSize = Math.min(w/ columns, h/ rows);
         blockSize = newBlockSize;
         block = new Rect(0, 0, newBlockSize, newBlockSize);
     }
@@ -172,9 +172,9 @@ public class Chessboard {
 
     public void onDraw(Canvas canvas) {
         boolean white;
-        for (int x = 0; x < width; x++) {
+        for (int x = 0; x < columns; x++) {
             white = x % 2 == 0;
-            for (int y = 0; y < height; y++) {
+            for (int y = 0; y < rows; y++) {
                 // draw the board
                 white = !white;
                 block.offsetTo(blockSize * x, blockSize * y);
@@ -271,7 +271,7 @@ public class Chessboard {
         int x = (int) xPix / blockSize;     // clicked on which block
         int y = (int) yPix / blockSize;
 
-        if (x >= width || y >= height) return;  // clicking outside of the board
+        if (x >= columns || y >= rows) return;  // clicking outside of the board
 
         // for drawing attack info
         if (infoX == x && infoY == y) {

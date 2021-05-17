@@ -15,8 +15,8 @@ public class PlayerAI {
     static int maxLookAhead = 20;
 
     // chess board dimension
-    static int boardWidth;
-    static int boardHeight;
+    static int columns;
+    static int rows;
 
     // location of Kings and Hearts, used for score calculation
     static ArrayList<int[]> wProtectees;
@@ -49,8 +49,8 @@ public class PlayerAI {
             Piece piece;
             wProtectees.clear();
             bProtectees.clear();
-            for (int x = 0; x < boardWidth; x++) {
-                for (int y = 0; y < boardHeight; y++) {
+            for (int x = 0; x < columns; x++) {
+                for (int y = 0; y < rows; y++) {
                     piece = board[y][x];
                     if (piece != null && (piece.isHeart() || piece.isKing()))
                         (piece.isBelongingTo(1) ? wProtectees : bProtectees).add(new int[]{x, y});
@@ -81,8 +81,8 @@ public class PlayerAI {
     private static ArrayList<int[]> getMoveOptions(GameState state) {
         ArrayList<int[]> moves = new ArrayList<>();
 
-        for (int xStart = 0; xStart < boardWidth; xStart++) {
-            for (int yStart = 0; yStart < boardHeight; yStart++) {
+        for (int xStart = 0; xStart < columns; xStart++) {
+            for (int yStart = 0; yStart < rows; yStart++) {
                 Piece pieceToMove = state.board[yStart][xStart];
                 if (pieceToMove != null && pieceToMove.isBelongingTo(state.playerToMove))
                     moves.addAll(pieceToMove.getMoveOptions(state, xStart, yStart, false));
@@ -124,8 +124,8 @@ public class PlayerAI {
 
         updateProtecteeLocations(state.board);
 
-        for (int x = 0; x < boardWidth; x++) {
-            for (int y = 0; y < boardHeight; y++) {
+        for (int x = 0; x < columns; x++) {
+            for (int y = 0; y < rows; y++) {
                 piece = state.board[y][x];
                 if (piece != null) {
                     minDist = Integer.MAX_VALUE;
@@ -186,8 +186,8 @@ public class PlayerAI {
         startTime = System.currentTimeMillis();                 // Remember computation start time
 
         mPlayer = state.playerToMove;
-        boardWidth = state.board[0].length;
-        boardHeight = state.board.length;
+        columns = state.board[0].length;
+        rows = state.board.length;
 
         wProtectees = new ArrayList<>();
         bProtectees = new ArrayList<>();
