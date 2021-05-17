@@ -20,7 +20,7 @@ public class GameView extends View {
     }
 
     @Override
-    public void onDraw (Canvas canvas) {
+    public void onDraw(Canvas canvas) {
         mChessboard.onDraw(canvas);
     }
 
