@@ -16,7 +16,7 @@ public class GameView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldW, int oldH) {
         super.onSizeChanged(w, h, oldW, oldH);
-        mChessboard.resize(w, h);
+        mChessboard.onSizeChanged(w, h);
     }
 
     @Override

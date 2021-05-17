@@ -160,7 +160,7 @@ public class Chessboard {
     /* drawing */
 
     // being called by GameView.onSizeChanged() to get the dimension of the View object
-    public void resize(int w, int h) {
+    public void onSizeChanged(int w, int h) {
         int newBlockSize = Math.min(w/width, h/height);
         blockSize = newBlockSize;
         block = new Rect(0, 0, newBlockSize, newBlockSize);
