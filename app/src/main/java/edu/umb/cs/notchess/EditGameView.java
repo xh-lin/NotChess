@@ -5,8 +5,8 @@ import android.graphics.Canvas;
 import android.view.MotionEvent;
 import android.view.View;
 
-public class CustomizationView extends View {
-    public CustomizationView(Context context) {
+public class EditGameView extends View {
+    public EditGameView(Context context) {
         super(context);
 
     }

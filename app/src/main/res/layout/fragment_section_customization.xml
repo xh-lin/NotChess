@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <View
-        android:id="@+id/customizationView"
+        android:id="@+id/editGameView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"/>
@@ -21,14 +21,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_delete"
-            android:layout_marginLeft="10dp"/>
+            android:layout_marginStart="10dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/columns"
             android:gravity="center"
-            android:layout_marginLeft="80dp"/>
+            android:layout_marginStart="80dp"/>
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -39,7 +39,7 @@
             android:layout_height="match_parent"
             android:text="@string/rows"
             android:gravity="center"
-            android:layout_marginLeft="10dp"/>
+            android:layout_marginStart="10dp"/>
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
