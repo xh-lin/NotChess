@@ -161,9 +161,8 @@ public class Chessboard {
 
     // being called by viewToDraw's onSizeChanged() to get the dimension of the View object
     public void onSizeChanged(int w, int h) {
-        int newBlockSize = Math.min(w / columns, h / rows);
-        blockSize = newBlockSize;
-        block = new Rect(0, 0, newBlockSize, newBlockSize);
+        blockSize = Math.min(w / columns, h / rows);
+        block = new Rect(0, 0, blockSize, blockSize);
     }
 
     private boolean isNeedRotate() {
