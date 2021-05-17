@@ -26,9 +26,8 @@ public class GameView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+        if (event.getActionMasked() == MotionEvent.ACTION_UP)
             mChessboard.select(event.getX(), event.getY());
-        }
 
         invalidate();   // update the canvas
         return true;

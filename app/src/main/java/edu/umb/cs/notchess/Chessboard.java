@@ -161,7 +161,7 @@ public class Chessboard {
 
     // being called by GameView.onSizeChanged() to get the dimension of the View object
     public void onSizeChanged(int w, int h) {
-        int newBlockSize = Math.min(w/ columns, h/ rows);
+        int newBlockSize = Math.min(w / columns, h / rows);
         blockSize = newBlockSize;
         block = new Rect(0, 0, newBlockSize, newBlockSize);
     }
