@@ -21,6 +21,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabLayout;
+
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class NavigationActivity extends FragmentActivity {
@@ -135,12 +137,34 @@ public class NavigationActivity extends FragmentActivity {
     }
 
 
-    public static class CustomizeObjectFragment extends Fragment {
+    public static class CustomizationObjectFragment extends Fragment {
+        final int LOWER = 3;
+        final int UPPER = 20;
+        final int DEFAULT = 8;
+
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_section_customize, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_section_customization, container, false);
+            Spinner columnsSpinner = rootView.findViewById(R.id.columns_spinner);
+            Spinner rowsSpinner = rootView.findViewById(R.id.rows_spinner);
+
+            ArrayList<String> spinnerArray = new ArrayList();
+            for (int i = LOWER; i <= UPPER; i++)
+                spinnerArray.add(String.valueOf(i));
+
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(),
+                    android.R.layout.simple_spinner_item,
+                    spinnerArray);
+
+            columnsSpinner.setAdapter(arrayAdapter);
+            rowsSpinner.setAdapter(arrayAdapter);
+
+            columnsSpinner.setSelection(DEFAULT - LOWER);
+            rowsSpinner.setSelection(DEFAULT - LOWER);
+
+            return rootView;
         }
     }
 
@@ -151,8 +175,8 @@ public class NavigationActivity extends FragmentActivity {
 
         public PagerAdapter(FragmentManager fm, Context context) {
             super(fm);
-            items = new Fragment[]{new LevelsObjectFragment(), new CustomizeObjectFragment()};
-            titles = new String[]{context.getString(R.string.levels), context.getString(R.string.customize)};
+            items = new Fragment[]{new LevelsObjectFragment(), new CustomizationObjectFragment()};
+            titles = new String[]{context.getString(R.string.levels), context.getString(R.string.customization)};
         }
 
         @NonNull
