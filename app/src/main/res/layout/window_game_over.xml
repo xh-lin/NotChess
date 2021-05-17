@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:onClick="hideView"
     android:background="@color/trans_grey"
-    android:id="@+id/game_over_window">
+    android:id="@+id/gameOverWindow">
 
     <LinearLayout
         android:layout_width="200dp"
@@ -28,7 +28,7 @@
             android:gravity="center"
             android:layout_marginHorizontal="8dp"
             android:layout_marginVertical="20dp"
-            android:id="@+id/game_over_text_view"/>
+            android:id="@+id/gameOverTextView"/>
 
         <Button
             android:layout_width="wrap_content"

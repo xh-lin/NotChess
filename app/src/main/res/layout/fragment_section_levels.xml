@@ -18,7 +18,7 @@
         android:layout_margin="30dp"/>
 
     <TextView
-        android:id="@+id/level_name"
+        android:id="@+id/levelName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -40,7 +40,7 @@
             android:textSize="20sp"/>
 
         <Spinner
-            android:id="@+id/ai_option"
+            android:id="@+id/aiOption"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:entries="@array/ai_option"/>
@@ -50,7 +50,7 @@
             android:layout_height="match_parent"/>
 
         <Button
-            android:id="@+id/start_level"
+            android:id="@+id/startLevelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="startLevel"

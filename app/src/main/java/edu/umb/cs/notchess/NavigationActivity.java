@@ -40,7 +40,7 @@ public class NavigationActivity extends FragmentActivity {
         viewPager = findViewById(R.id.pager);
         viewPager.setAdapter(collectionPagerAdapter);
 
-        TabLayout tabLayout = findViewById(R.id.tab_layout);
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
     }
 
@@ -78,12 +78,12 @@ public class NavigationActivity extends FragmentActivity {
                                  @Nullable Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_section_levels, container, false);
 
-            levelNameTextView = rootView.findViewById(R.id.level_name);
-            startLevelButton = rootView.findViewById(R.id.start_level);
+            levelNameTextView = rootView.findViewById(R.id.levelName);
+            startLevelButton = rootView.findViewById(R.id.startLevelButton);
             startLevelButton.setEnabled(false);
 
             // drop down option for the computer player
-            Spinner aiOption = rootView.findViewById(R.id.ai_option);
+            Spinner aiOption = rootView.findViewById(R.id.aiOption);
             aiOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -147,8 +147,8 @@ public class NavigationActivity extends FragmentActivity {
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_section_customization, container, false);
-            Spinner columnsSpinner = rootView.findViewById(R.id.columns_spinner);
-            Spinner rowsSpinner = rootView.findViewById(R.id.rows_spinner);
+            Spinner columnsSpinner = rootView.findViewById(R.id.columnsSpinner);
+            Spinner rowsSpinner = rootView.findViewById(R.id.rowsSpinner);
 
             ArrayList<String> spinnerArray = new ArrayList();
             for (int i = LOWER; i <= UPPER; i++)

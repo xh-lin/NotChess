@@ -319,7 +319,7 @@ public class Chessboard {
     private void showGameOverDialog(int textId) {
         gameOverView.bringToFront();
         gameOverView.setVisibility(View.VISIBLE);
-        TextView textView = gameOverView.findViewById(R.id.game_over_text_view);
+        TextView textView = gameOverView.findViewById(R.id.gameOverTextView);
         textView.setText(textId);
     }
 

@@ -292,7 +292,7 @@ public enum Piece {
                     xEnd += pawnMoveDir[0][0];
                     yEnd += pawnMoveDir[0][1];
                     if (!getAttacks && isWithinBoard(state.board, xEnd, yEnd) && state.board[yEnd][xEnd] == null) {
-                        addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd, getAttacks);
+                        addPawnMoves(moves, state.board, xStart, yStart, xEnd, yEnd, false);
                     } else {
                         break;
                     }
