@@ -7,6 +7,9 @@ import org.json.JSONObject;
 public class BoardParser {
     static final String JSON_KEY = "board";
 
+    // private constructor prevents someone from accidentally instantiating this class
+    private BoardParser() {}
+
     static JSONObject toJson(Piece[][] board) {
         JSONObject jsonObject = new JSONObject();
 
