@@ -21,7 +21,7 @@ public class ChessboardEditor {
     private final Context context;          // context of GameView
     private final View viewToDraw;          // the View object that draws the chess board
 
-    private Piece[][] board;
+    static Piece[][] board;
     private int columns;                // dimension of the chess board
     private int rows;
     private int w;                          // View width

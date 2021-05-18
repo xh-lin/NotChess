@@ -27,6 +27,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabLayout;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -52,15 +54,27 @@ public class NavigationActivity extends FragmentActivity {
     /*============================================================================================*/
     /* for LevelsObjectFragment */
 
-    public void onClickStartLevel(View view) {
+    public void startLevel(Piece[][] board, int aiOption) {
         Intent intent = new Intent(this, LevelActivity.class);
         startActivity(intent);
 
+        JSONObject jsonObject = BoardParser.toJson(board);
+
         SharedPreferences.Editor editor = getSharedPreferences(
                 getString(R.string.app_name), MODE_PRIVATE).edit();
-        editor.putInt(getString(R.string.start_level), level);
+
+        editor.putString(getString(R.string.start_level), jsonObject.toString());
         editor.putInt(getString(R.string.start_ai_option), aiOption);
+
         editor.apply();
+    }
+
+    public void onClickStartLevel(View view) {
+        startLevel(Levels.boards[level], aiOption);
+    }
+
+    public void onClickStartCustomLevel(View view) {
+        startLevel(ChessboardEditor.board, aiOption);
     }
 
     private void setLevel(int level) {

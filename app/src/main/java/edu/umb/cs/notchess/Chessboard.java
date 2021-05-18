@@ -59,18 +59,13 @@ public class Chessboard {
     private final View bPromotionView;
 
     private final View gameOverView;        // game over dialog
-    private int ai = 0;                     // 1 -> White, -1 -> Black, 0 -> disable
+    private final int ai;                     // 1 -> White, -1 -> Black, 0 -> disable
 
 
-    public Chessboard(Context context, View viewToDraw) {
+    public Chessboard(Context context, View viewToDraw, Piece[][] board, int ai) {
         LevelActivity levelActivity = ((LevelActivity) context);
-        SharedPreferences prefs = context.getSharedPreferences(
-                context.getString(R.string.app_name), Context.MODE_PRIVATE);
-        // index of Levels.boards
-        int level = prefs.getInt(context.getString(R.string.start_level), -1);
-        // spinner items: 0 -> disable, 1 -> Black, 2 -> White
-        int aiOption = prefs.getInt(context.getString(R.string.start_ai_option), -1);
 
+        this.ai = ai;
         this.context = context;
         this.viewToDraw = viewToDraw;
         indicatorView = levelActivity.findViewById(R.id.indicatorView);
@@ -94,7 +89,6 @@ public class Chessboard {
         gameOverView.setVisibility(View.INVISIBLE);
 
         // preparing the game state
-        Piece[][] board = Levels.boards[level]; // load the chess board by index
         columns = board[0].length;           // get dimension
         rows = board.length;
 
@@ -113,15 +107,6 @@ public class Chessboard {
 
         state = new GameState(board, wPieceCount, bPieceCount, null, null, 1);
         initState = state.clone();
-
-        // playerAI option
-        switch (aiOption) {
-            case 1: // Black
-                ai = -1;
-                break;
-            case 2: // White
-                ai = 1;
-        }
 
         // create paints
         whitePaint = new Paint();
