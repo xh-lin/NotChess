@@ -6,11 +6,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <View
+    <edu.umb.cs.notchess.EditGameView
         android:id="@+id/editGameView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,29 +21,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_delete"
-            android:layout_marginStart="10dp"/>
+            android:layout_marginStart="10dp"
+            android:id="@+id/deleteButton"
+            android:tag="@string/delete" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/columns"
             android:gravity="center"
-            android:layout_marginStart="80dp"/>
+            android:layout_marginStart="80dp" />
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:id="@+id/columnsSpinner"/>
+            android:id="@+id/columnsSpinner" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/rows"
             android:gravity="center"
-            android:layout_marginStart="10dp"/>
+            android:layout_marginStart="10dp" />
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:id="@+id/rowsSpinner"/>
+            android:id="@+id/rowsSpinner" />
 
     </LinearLayout>
 
@@ -53,91 +55,106 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:id="@+id/piecesLayout">
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/w_heart" />
+                android:src="@drawable/w_heart"
+                android:tag="@string/w_heart"/>
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/w_king" />
+                android:src="@drawable/w_king"
+                android:tag="@string/w_king"/>
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/w_queen" />
+                android:src="@drawable/w_queen"
+                android:tag="@string/w_queen"/>
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/w_bishop" />
+                android:src="@drawable/w_bishop"
+                android:tag="@string/w_bishop"/>
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/w_knight" />
+                android:src="@drawable/w_knight"
+                android:tag="@string/w_knight" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/w_rook" />
+                android:src="@drawable/w_rook"
+                android:tag="@string/w_rook" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/w_pawn" />
+                android:src="@drawable/w_pawn"
+                android:tag="@string/w_pawn" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/b_heart" />
+                android:src="@drawable/b_heart"
+                android:tag="@string/b_heart" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/b_king" />
+                android:src="@drawable/b_king"
+                android:tag="@string/b_king" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/b_queen" />
+                android:src="@drawable/b_queen"
+                android:tag="@string/b_queen" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/b_bishop" />
+                android:src="@drawable/b_bishop"
+                android:tag="@string/b_bishop" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/b_knight" />
+                android:src="@drawable/b_knight"
+                android:tag="@string/b_knight" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/b_rook" />
+                android:src="@drawable/b_rook"
+                android:tag="@string/b_rook" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
-                android:src="@drawable/b_pawn" />
+                android:src="@drawable/b_pawn"
+                android:tag="@string/b_pawn" />
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -149,17 +166,17 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/load"/>
+            android:text="@string/load" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/save"
             android:layout_marginVertical="10dp"
-            android:layout_marginHorizontal="20dp"/>
+            android:layout_marginHorizontal="20dp" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/start"/>
+            android:text="@string/start" />
     </LinearLayout>
 
 </LinearLayout>

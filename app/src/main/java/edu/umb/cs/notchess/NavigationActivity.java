@@ -1,16 +1,21 @@
 package edu.umb.cs.notchess;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -44,7 +49,10 @@ public class NavigationActivity extends FragmentActivity {
         tabLayout.setupWithViewPager(viewPager);
     }
 
-    public void startLevel(View view) {
+    /*============================================================================================*/
+    /* for LevelsObjectFragment */
+
+    public void onClickStartLevel(View view) {
         Intent intent = new Intent(this, LevelActivity.class);
         startActivity(intent);
 
@@ -91,8 +99,7 @@ public class NavigationActivity extends FragmentActivity {
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                }
+                public void onNothingSelected(AdapterView<?> adapterView) {}
             });
 
             // load titles of each level
@@ -138,31 +145,77 @@ public class NavigationActivity extends FragmentActivity {
 
 
     public static class CustomizationObjectFragment extends Fragment {
-        final int LOWER = 3;
-        final int UPPER = 20;
-        final int DEFAULT = 8;
+        View lastPressedView;   // for piece selection
 
+        @SuppressLint("ClickableViewAccessibility")
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_section_customization, container, false);
+            EditGameView editGameView = rootView.findViewById(R.id.editGameView);
             Spinner columnsSpinner = rootView.findViewById(R.id.columnsSpinner);
             Spinner rowsSpinner = rootView.findViewById(R.id.rowsSpinner);
 
+            // setup spinners with adapters
             ArrayList<String> spinnerArray = new ArrayList();
-            for (int i = LOWER; i <= UPPER; i++)
+            for (int i = ChessboardEditor.MIN_SIZE; i <= ChessboardEditor.MAX_SIZE; i++)
                 spinnerArray.add(String.valueOf(i));
-
             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getContext(),
                     android.R.layout.simple_spinner_item,
                     spinnerArray);
-
             columnsSpinner.setAdapter(arrayAdapter);
             rowsSpinner.setAdapter(arrayAdapter);
 
-            columnsSpinner.setSelection(DEFAULT - LOWER);
-            rowsSpinner.setSelection(DEFAULT - LOWER);
+            columnsSpinner.setSelection(ChessboardEditor.DEFAULT_SIZE - ChessboardEditor.MIN_SIZE);
+            rowsSpinner.setSelection(ChessboardEditor.DEFAULT_SIZE - ChessboardEditor.MIN_SIZE);
+
+            columnsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    editGameView.chessboardEditor.setColumns(i + ChessboardEditor.MIN_SIZE);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {}
+            });
+
+            rowsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    editGameView.chessboardEditor.setRows(i + ChessboardEditor.MIN_SIZE);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {}
+            });
+
+            // OnTouchListener for imageButtons
+            View.OnTouchListener onTouchListener = (view, motionEvent) -> {
+                if (motionEvent.getActionMasked() == MotionEvent.ACTION_UP) {
+                    if (lastPressedView != null)    // deselect last one
+                        lastPressedView.setPressed(false);
+                    if (lastPressedView != view) {  // select
+                        view.setPressed(true);
+                        lastPressedView = view;
+                        editGameView.chessboardEditor.buttonPressed((String) view.getTag());
+                    } else {                        // deselect if clicking the same one
+                        lastPressedView = null;
+                        editGameView.chessboardEditor.buttonPressed(null);
+                    }
+                }
+                return true;
+            };
+
+            // delete button
+            ImageButton deleteButton = rootView.findViewById(R.id.deleteButton);
+            deleteButton.setOnTouchListener(onTouchListener);
+
+            // piece buttons
+            LinearLayout piecesLayout = rootView.findViewById(R.id.piecesLayout);
+            int childCount = piecesLayout.getChildCount();
+            for (int i = 0; i < childCount; i++)
+                piecesLayout.getChildAt(i).setOnTouchListener(onTouchListener);
 
             return rootView;
         }

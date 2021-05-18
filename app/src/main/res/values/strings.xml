@@ -4,6 +4,21 @@
     <!--  Key  -->
     <string name="start_level">start_level</string>
     <string name="start_ai_option">start_ai_option</string>
+    <string name="delete">delete</string>
+    <string name="w_heart">w_heart</string>
+    <string name="w_king">w_king</string>
+    <string name="w_queen">w_queen</string>
+    <string name="w_bishop">w_bishop</string>
+    <string name="w_knight">w_knight</string>
+    <string name="w_rook">w_rook</string>
+    <string name="w_pawn">w_pawn</string>
+    <string name="b_heart">b_heart</string>
+    <string name="b_king">b_king</string>
+    <string name="b_queen">b_queen</string>
+    <string name="b_bishop">b_bishop</string>
+    <string name="b_knight">b_knight</string>
+    <string name="b_rook">b_rook</string>
+    <string name="b_pawn">b_pawn</string>
 
     <!--  Setting  -->
     <string name="setting_rotate_pieces">setting_rotate_pieces</string>
