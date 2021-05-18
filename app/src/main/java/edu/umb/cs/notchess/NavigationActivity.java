@@ -33,8 +33,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class NavigationActivity extends FragmentActivity {
-    PagerAdapter collectionPagerAdapter;
-    ViewPager viewPager;
+    // used in LevelsObjectFragment and CustomizationObjectFragment
+    public AdapterView.OnItemSelectedListener aiOptionListener;
+
     int level;
     int aiOption;
 
@@ -43,12 +44,22 @@ public class NavigationActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
 
-        collectionPagerAdapter = new PagerAdapter(getSupportFragmentManager(), this);
-        viewPager = findViewById(R.id.pager);
+        PagerAdapter collectionPagerAdapter = new PagerAdapter(getSupportFragmentManager(), this);
+        ViewPager viewPager = findViewById(R.id.pager);
         viewPager.setAdapter(collectionPagerAdapter);
 
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
+
+        aiOptionListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                aiOption = i;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        };
     }
 
     /*============================================================================================*/
@@ -77,19 +88,13 @@ public class NavigationActivity extends FragmentActivity {
         startLevel(ChessboardEditor.board, aiOption);
     }
 
-    private void setLevel(int level) {
-        this.level = level;
-    }
-
-    private void setAIOption(int aiOption) {
-        this.aiOption = aiOption;
-    }
-
+    /*============================================================================================*/
     /*============================================================================================*/
     /* PagerAdapter */
 
+    // The first page
     public static class LevelsObjectFragment extends Fragment {
-        int level = -1;
+        int selectedLevel = -1;
         View lastView;
         TextView levelNameTextView;
         Button startLevelButton;
@@ -106,15 +111,7 @@ public class NavigationActivity extends FragmentActivity {
 
             // drop down option for the computer player
             Spinner aiOption = rootView.findViewById(R.id.aiOption);
-            aiOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    ((NavigationActivity) Objects.requireNonNull(getActivity())).setAIOption(i);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {}
-            });
+            aiOption.setOnItemSelectedListener(((NavigationActivity) getActivity()).aiOptionListener);
 
             // load titles of each level
             int levelCount = Levels.titles.length;
@@ -129,9 +126,9 @@ public class NavigationActivity extends FragmentActivity {
 
             // handle selecting level buttons
             gridView.setOnItemClickListener((adapterView, view, i, l) -> {
-                if (level != i) {
-                    level = i;
-                    ((NavigationActivity) getActivity()).setLevel(level);   // set level
+                if (selectedLevel != i) {
+                    selectedLevel = i;
+                    ((NavigationActivity) getActivity()).level = selectedLevel;   // set level
 
                     levelNameTextView.setText(Levels.titles[i]);    // set title name
                     view.setBackgroundColor(getResources().getColor(R.color.purple_500));   // set selected color
@@ -143,7 +140,7 @@ public class NavigationActivity extends FragmentActivity {
                     if (!startLevelButton.isEnabled())
                         startLevelButton.setEnabled(true);
                 } else {    // deselect
-                    level = -1;
+                    selectedLevel = -1;
 
                     levelNameTextView.setText("");
                     view.setBackgroundColor(getResources().getColor(R.color.purple_200));
@@ -157,7 +154,7 @@ public class NavigationActivity extends FragmentActivity {
         }
     }
 
-
+    // The second page
     public static class CustomizationObjectFragment extends Fragment {
         View lastPressedView;   // for piece selection
 
@@ -204,6 +201,10 @@ public class NavigationActivity extends FragmentActivity {
                 public void onNothingSelected(AdapterView<?> adapterView) {}
             });
 
+            // drop down option for the computer player
+            Spinner aiOption = rootView.findViewById(R.id.aiOption);
+            aiOption.setOnItemSelectedListener(((NavigationActivity) getActivity()).aiOptionListener);
+
             // OnTouchListener for imageButtons
             View.OnTouchListener onTouchListener = (view, motionEvent) -> {
                 if (motionEvent.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -225,7 +226,7 @@ public class NavigationActivity extends FragmentActivity {
             ImageButton deleteButton = rootView.findViewById(R.id.deleteButton);
             deleteButton.setOnTouchListener(onTouchListener);
 
-            // piece buttons
+            // piece selection buttons
             LinearLayout piecesLayout = rootView.findViewById(R.id.piecesLayout);
             int childCount = piecesLayout.getChildCount();
             for (int i = 0; i < childCount; i++)

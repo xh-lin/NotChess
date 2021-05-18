@@ -30,7 +30,7 @@
             android:layout_height="match_parent"
             android:text="@string/columns"
             android:gravity="center"
-            android:layout_marginStart="80dp" />
+            android:layout_marginStart="10dp" />
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -40,12 +40,23 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/rows"
-            android:gravity="center"
-            android:layout_marginStart="10dp" />
+            android:gravity="center" />
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/rowsSpinner" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/play_with_ai"
+            android:gravity="center"
+            android:layout_marginStart="10dp"/>
+        <Spinner
+            android:id="@+id/aiOption"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:entries="@array/ai_option" />
 
     </LinearLayout>
 
