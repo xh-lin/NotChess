@@ -4,7 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class boardParser {
+public class BoardParser {
     static final String JSON_KEY = "board";
 
     static JSONObject toJson(Piece[][] board) {
