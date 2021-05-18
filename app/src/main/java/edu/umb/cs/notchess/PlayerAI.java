@@ -236,6 +236,15 @@ public class PlayerAI {
                 break;
         }
 
-        return (favoredMoveScore * mPlayer < 0 && incompleteMoveScore * mPlayer > 0) ? incompleteMove : favoredMove;
+        int[] returnMove;
+        if (favoredMoveScore * mPlayer < 0 && incompleteMoveScore * mPlayer > 0) {
+            returnMove = incompleteMove;
+            Log.i("AI", String.format("-- PlayerAI: Favorite incomplete move (%d,%d)->(%d,%d), score = %.1f",
+                    incompleteMove[0], incompleteMove[1], incompleteMove[2], incompleteMove[3], incompleteMoveScore));
+        } else {
+            returnMove = favoredMove;
+        }
+
+        return returnMove;
     }
 }
