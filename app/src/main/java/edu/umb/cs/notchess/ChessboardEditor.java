@@ -5,9 +5,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import static edu.umb.cs.notchess.Piece.*;
+
+import android.util.Log;
 import android.view.View;
 
 import androidx.core.content.ContextCompat;
+
+import org.json.JSONObject;
 
 public class ChessboardEditor {
     static final int MIN_SIZE = 3;
@@ -131,52 +135,10 @@ public class ChessboardEditor {
     public void buttonPressed(String tag) {
         buttonPressed = tag != null;
         if (buttonPressed) {
-            switch (tag) {
-                case "delete":
-                    pieceToAdd = null;
-                    break;
-                case "w_heart":
-                    pieceToAdd = W_Heart;
-                    break;
-                case "w_king":
-                    pieceToAdd = W_King;
-                    break;
-                case "w_queen":
-                    pieceToAdd = W_Queen;
-                    break;
-                case "w_bishop":
-                    pieceToAdd = W_Bishop;
-                    break;
-                case "w_knight":
-                    pieceToAdd = W_Knight;
-                    break;
-                case "w_rook":
-                    pieceToAdd = W_Rook;
-                    break;
-                case "w_pawn":
-                    pieceToAdd = W_Pawn;
-                    break;
-                case "b_heart":
-                    pieceToAdd = B_Heart;
-                    break;
-                case "b_king":
-                    pieceToAdd = B_King;
-                    break;
-                case "b_queen":
-                    pieceToAdd = B_Queen;
-                    break;
-                case "b_bishop":
-                    pieceToAdd = B_Bishop;
-                    break;
-                case "b_knight":
-                    pieceToAdd = B_Knight;
-                    break;
-                case "b_rook":
-                    pieceToAdd = B_Rook;
-                    break;
-                case "b_pawn":
-                    pieceToAdd = B_Pawn;
-                    break;
+            if ("delete".equals(tag)) {
+                pieceToAdd = null;
+            } else {
+                pieceToAdd = valueOf(tag);
             }
         }
     }

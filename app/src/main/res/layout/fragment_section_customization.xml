@@ -64,98 +64,98 @@
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/w_heart"
-                android:tag="@string/w_heart"/>
+                android:tag="@string/W_Heart"/>
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/w_king"
-                android:tag="@string/w_king"/>
+                android:tag="@string/W_King"/>
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/w_queen"
-                android:tag="@string/w_queen"/>
+                android:tag="@string/W_Queen"/>
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/w_bishop"
-                android:tag="@string/w_bishop"/>
+                android:tag="@string/W_Bishop"/>
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/w_knight"
-                android:tag="@string/w_knight" />
+                android:tag="@string/W_Knight" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/w_rook"
-                android:tag="@string/w_rook" />
+                android:tag="@string/W_Rook" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/w_pawn"
-                android:tag="@string/w_pawn" />
+                android:tag="@string/W_Pawn" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/b_heart"
-                android:tag="@string/b_heart" />
+                android:tag="@string/B_Heart" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/b_king"
-                android:tag="@string/b_king" />
+                android:tag="@string/B_King" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/b_queen"
-                android:tag="@string/b_queen" />
+                android:tag="@string/B_Queen" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/b_bishop"
-                android:tag="@string/b_bishop" />
+                android:tag="@string/B_Bishop" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/b_knight"
-                android:tag="@string/b_knight" />
+                android:tag="@string/B_Knight" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/b_rook"
-                android:tag="@string/b_rook" />
+                android:tag="@string/B_Rook" />
             <ImageButton
                 android:layout_width="70dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scaleType="fitCenter"
                 android:src="@drawable/b_pawn"
-                android:tag="@string/b_pawn" />
+                android:tag="@string/B_Pawn" />
         </LinearLayout>
     </HorizontalScrollView>
 
