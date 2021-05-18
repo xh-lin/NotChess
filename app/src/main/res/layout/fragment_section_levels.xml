@@ -15,7 +15,7 @@
         android:horizontalSpacing="20dp"
         android:verticalSpacing="20dp"
         android:layout_weight="1"
-        android:layout_margin="30dp"/>
+        android:layout_margin="30dp" />
 
     <TextView
         android:id="@+id/levelName"
@@ -37,17 +37,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/play_with_ai"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
 
         <Spinner
             android:id="@+id/aiOption"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:entries="@array/ai_option"/>
+            android:entries="@array/ai_option" />
 
         <Space
             android:layout_width="30dp"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
         <Button
             android:id="@+id/startLevelButton"

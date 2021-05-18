@@ -28,19 +28,19 @@
             android:gravity="center"
             android:layout_marginHorizontal="8dp"
             android:layout_marginVertical="20dp"
-            android:id="@+id/gameOverTextView"/>
+            android:id="@+id/gameOverTextView" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/reset"
-            android:onClick="onClickResetBoard"/>
+            android:onClick="onClickResetBoard" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/back"
-            android:onClick="onClickCloseActivity"/>
+            android:onClick="onClickCloseActivity" />
 
     </LinearLayout>
 
