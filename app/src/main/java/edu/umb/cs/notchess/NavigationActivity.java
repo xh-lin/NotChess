@@ -33,11 +33,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class NavigationActivity extends FragmentActivity {
-    // used in LevelsObjectFragment and CustomizationObjectFragment
-    public AdapterView.OnItemSelectedListener aiOptionListener;
-
-    int level;
-    int aiOption;
+    private int level;
+    private int aiOption;
+    private int aiOptionCustom;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,16 +48,6 @@ public class NavigationActivity extends FragmentActivity {
 
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(viewPager);
-
-        aiOptionListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                aiOption = i;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        };
     }
 
     /*============================================================================================*/
@@ -85,7 +73,7 @@ public class NavigationActivity extends FragmentActivity {
     }
 
     public void onClickStartCustomLevel(View view) {
-        startLevel(ChessboardEditor.board, aiOption);
+        startLevel(ChessboardEditor.board, aiOptionCustom);
     }
 
     /*============================================================================================*/
@@ -111,7 +99,15 @@ public class NavigationActivity extends FragmentActivity {
 
             // drop down option for the computer player
             Spinner aiOption = rootView.findViewById(R.id.aiOption);
-            aiOption.setOnItemSelectedListener(((NavigationActivity) getActivity()).aiOptionListener);
+            aiOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    ((NavigationActivity) getActivity()).aiOption = i;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {}
+            });
 
             // load titles of each level
             int levelCount = Levels.titles.length;
@@ -203,7 +199,15 @@ public class NavigationActivity extends FragmentActivity {
 
             // drop down option for the computer player
             Spinner aiOption = rootView.findViewById(R.id.aiOption);
-            aiOption.setOnItemSelectedListener(((NavigationActivity) getActivity()).aiOptionListener);
+            aiOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    ((NavigationActivity) getActivity()).aiOptionCustom = i;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {}
+            });
 
             // OnTouchListener for imageButtons
             View.OnTouchListener onTouchListener = (view, motionEvent) -> {
