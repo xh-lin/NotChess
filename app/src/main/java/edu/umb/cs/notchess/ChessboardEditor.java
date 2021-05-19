@@ -135,7 +135,7 @@ public class ChessboardEditor {
     public void buttonPressed(String tag) {
         buttonPressed = tag != null;
         if (buttonPressed) {
-            if ("delete".equals(tag)) {
+            if (tag.equals("Delete")) {
                 pieceToAdd = null;
             } else {
                 pieceToAdd = valueOf(tag);

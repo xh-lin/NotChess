@@ -4,7 +4,6 @@
     <!--  Key  -->
     <string name="start_level">start_level</string>
     <string name="start_ai_option">start_ai_option</string>
-    <string name="delete">delete</string>
     
     <string name="W_Heart">W_Heart</string>
     <string name="W_King">W_King</string>
@@ -51,6 +50,7 @@
     <string name="load">Load</string>
     <string name="columns">Columns:</string>
     <string name="rows">Rows:</string>
+    <string name="delete">Delete</string>
 
     <string-array name="ai_option">
         <item>Off</item>
