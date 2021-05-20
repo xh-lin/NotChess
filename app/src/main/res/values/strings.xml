@@ -58,6 +58,7 @@
     <string name="delete">Delete</string>
     <string name="enter_title">Enter title…</string>
     <string name="by_xu_huang_lin">by Xu Huang Lin</string>
+    <string name="ai">AI</string>
 
     <string-array name="ai_option">
         <item>Off</item>
