@@ -135,6 +135,7 @@ public class Chessboard {
         spriteRect = new Rect(0, 0, moveBitmap.getWidth(), moveBitmap.getHeight());
 
         Piece.loadAssets(context.getResources());   // load drawables for Piece
+        GameState.setContext(context);
         updateMoveIndicator();
 
         if (ai == state.playerToMove)

@@ -190,7 +190,7 @@ public class NavigationActivity extends FragmentActivity {
     public void onClickNothing(View view) {}
 
     public void onClickDelete(View view) {
-        Toast.makeText(getApplicationContext(),
+        Toast.makeText(this,
                 "\"" + levelList.titles.get(selectedLevelIdx) + "\" deleted.",
                 Toast.LENGTH_SHORT).show();
 
@@ -203,7 +203,7 @@ public class NavigationActivity extends FragmentActivity {
     }
 
     public void onClickLoad(View view) {
-        Toast.makeText(getApplicationContext(),
+        Toast.makeText(this,
                 "\"" + levelList.titles.get(selectedLevelIdx) + "\" loaded.",
                 Toast.LENGTH_SHORT).show();
 
@@ -236,7 +236,7 @@ public class NavigationActivity extends FragmentActivity {
         editText.setText("");                                   // clean text input
         onClickHideView(saveLevelView);                         // close menu
 
-        Toast.makeText(getApplicationContext(),
+        Toast.makeText(this,
                 "\"" + title + "\" saved.",
                 Toast.LENGTH_SHORT).show();
     }

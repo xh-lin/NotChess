@@ -1,6 +1,8 @@
 package edu.umb.cs.notchess;
 
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.math.MathUtils;
@@ -27,6 +29,8 @@ public class GameState {
     public HashSet<List<Integer>>[][] underAttackByW;   // each block is being attacked by which ...
     public HashSet<List<Integer>>[][] underAttackByB;   // ... using List so HashSet can compare it
     public ArrayList<int[]>[][] attacking;     // each piece is attacking which blocks
+
+    static Context context;
 
 
     GameState(Piece[][] board, int[] wPieceCount, int[] bPieceCount,
@@ -74,6 +78,10 @@ public class GameState {
                 addAttacking(x, y);
             }
         }
+    }
+
+    static void setContext(Context c) {
+        context = c;
     }
 
     @NonNull
@@ -156,7 +164,7 @@ public class GameState {
 
         if (kicked != null && toMove.isFriendlyWith(kicked)
                 && toMove.isKing() && kicked.isRook()) {
-            // castling
+            // special move: castling
             int xDir = xEnd - xStart;
             int yDir = yEnd - yStart;
             int xKingEnd = xStart + MathUtils.clamp(xDir, -2, 2);
@@ -178,6 +186,8 @@ public class GameState {
 
             updateAttacking(xStart, yStart, xKingEnd, yKingEnd);
             updateAttacking(xEnd, yEnd, xRookEnd, yRookEnd);
+
+            Toast.makeText(context, "castling", Toast.LENGTH_SHORT).show();
         } else {    // make a move
             board[yEnd][xEnd] = toMove;
             board[yStart][xStart] = null;
@@ -194,6 +204,8 @@ public class GameState {
                 if (pieceBehind != null && pieceBehind.isPawn()) {      // if it was en passant move
                     kicked = pieceBehind;
                     board[yBehind][xBehind] = null;
+
+                    Toast.makeText(context, "en passant", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -215,6 +227,8 @@ public class GameState {
                         toMove = w ? W_Rook : B_Rook;
                 }
                 board[yEnd][xEnd] = toMove;
+
+                Toast.makeText(context, "promotion", Toast.LENGTH_SHORT).show();
             }
 
             // count the number of pieces left
