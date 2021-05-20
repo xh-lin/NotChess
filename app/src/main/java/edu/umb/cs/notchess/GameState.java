@@ -1,17 +1,13 @@
 package edu.umb.cs.notchess;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.core.math.MathUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-
 import static edu.umb.cs.notchess.Piece.*;
 
 // for PlayerAI to do calculations

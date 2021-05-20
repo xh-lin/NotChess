@@ -5,13 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import static edu.umb.cs.notchess.Piece.*;
-
-import android.util.Log;
 import android.view.View;
-
 import androidx.core.content.ContextCompat;
-
-import org.json.JSONObject;
 
 public class ChessboardEditor {
     static final int MIN_SIZE = 3;

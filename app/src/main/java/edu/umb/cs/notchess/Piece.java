@@ -4,11 +4,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Rect;
-
 import androidx.core.math.MathUtils;
-
 import java.util.ArrayList;
 
 public enum Piece {

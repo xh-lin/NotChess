@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
 import android.view.View;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
