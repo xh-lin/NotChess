@@ -24,9 +24,14 @@
     <string name="setting_rotate_pieces">setting_rotate_pieces</string>
     <string name="rotate_pieces_title">Rotate Pieces</string>
     <string name="rotate_pieces_summary">Rotate the direction of pieces when it is black\'s turn.</string>
+
+    <string name="setting_show_move_hint">setting_show_move_hint</string>
+    <string name="show_move_hint_title">Show Move Hint</string>
+    <string name="show_move_hint_summary">Show hint for move options of a selected piece.</string>
+
     <string name="setting_show_attack_info">setting_show_attack_info</string>
     <string name="show_attack_info_title">Show Attack Info</string>
-    <string name="show_attack_info_summary">Show attacking and under attack info of touched block.</string>
+    <string name="show_attack_info_summary">Show attacking and under attack info of a touched block.</string>
 
     <!--  game over dialog text  -->
     <string name="black_wins">Black Wins</string>

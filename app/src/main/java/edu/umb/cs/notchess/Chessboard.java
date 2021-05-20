@@ -36,7 +36,6 @@ public class Chessboard {
 
     private int blockSize;                  // width/height of a block
     private Rect block;                     // used for drawing each block of the board
-    private final boolean doRotatePieces;   // rotate pieces option from the setting
 
     private final Bitmap moveBitmap;        // for showing move options
     private final Bitmap kickBitmap;        // for showing move options to kick a piece
@@ -46,7 +45,6 @@ public class Chessboard {
     private final Paint greenPaint;         // dor drawing under attack info
     private int infoX = -1;                 // coordinate to draw
     private int infoY = -1;
-    private final boolean doShowAttackInfo; // show attack info option from the setting
 
     /* for making moves */
 
@@ -60,6 +58,12 @@ public class Chessboard {
 
     private final View gameOverView;        // game over dialog
     private final int ai;                     // 1 -> White, -1 -> Black, 0 -> disable
+
+    /* settings */
+
+    private final boolean doRotatePieces;   // rotate pieces option from the setting
+    private final boolean doShowMoveHint;   // show hint for move options
+    private final boolean doShowAttackInfo; // show attack info option from the setting
 
 
     public Chessboard(Context context, View viewToDraw, Piece[][] board, int ai) {
@@ -125,6 +129,9 @@ public class Chessboard {
         doRotatePieces = PreferenceManager
                 .getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(R.string.setting_rotate_pieces), true);
+        doShowMoveHint = PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.setting_show_move_hint), true);
         doShowAttackInfo = PreferenceManager
                 .getDefaultSharedPreferences(context)
                 .getBoolean(context.getString(R.string.setting_show_attack_info), false);
@@ -177,7 +184,7 @@ public class Chessboard {
         }
 
         // draw move options
-        if (moveList != null) {
+        if (doShowMoveHint && moveList != null) {
             for (int[] move : moveList) {
                 if (move[4] <= 0) {    // avoid drawing promotion multiple times
                     int xEnd = move[2];

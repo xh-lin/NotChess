@@ -8,6 +8,12 @@
         android:summary="@string/rotate_pieces_summary" />
 
     <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/setting_show_move_hint"
+        android:title="@string/show_move_hint_title"
+        android:summary="@string/show_move_hint_summary" />
+
+    <SwitchPreference
         android:defaultValue="false"
         android:key="@string/setting_show_attack_info"
         android:title="@string/show_attack_info_title"
