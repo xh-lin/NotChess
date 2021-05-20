@@ -20,6 +20,7 @@ public enum Piece {
     public final int value;
     private int pawnDirection = -1;             // 0: up, 1: down, 2: left, 3: right
 
+    static boolean isLoaded;
     static Rect spriteRect;                     // for drawing a sprite
     static Bitmap[] wPieceBitmaps;              // containing sprites
     static Bitmap[] bPieceBitmaps;
@@ -46,10 +47,16 @@ public enum Piece {
     /* drawing */
 
     static void loadAssets(final Resources res) {
+        if (isLoaded)
+            return;
+        isLoaded = true;
+
         // load bitmaps for each piece
         int numPiece = 7;
         wPieceBitmaps = new Bitmap[numPiece];
         bPieceBitmaps = new Bitmap[numPiece];
+        wRotatePieceBitmaps = new Bitmap[numPiece];
+        bRotatePieceBitmaps = new Bitmap[numPiece];
 
         wPieceBitmaps[0] = BitmapFactory.decodeResource(res, R.drawable.w_king);
         wPieceBitmaps[1] = BitmapFactory.decodeResource(res, R.drawable.w_queen);
@@ -67,23 +74,24 @@ public enum Piece {
         bPieceBitmaps[5] = BitmapFactory.decodeResource(res, R.drawable.b_pawn);
         bPieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.b_heart);
 
-        wRotatePieceBitmaps = new Bitmap[numPiece];
-        bRotatePieceBitmaps = new Bitmap[numPiece];
-        Matrix rotateMatrix = new Matrix();
-        rotateMatrix.postRotate(180);
+        wRotatePieceBitmaps[0] = BitmapFactory.decodeResource(res, R.drawable.w_king_180);
+        wRotatePieceBitmaps[1] = BitmapFactory.decodeResource(res, R.drawable.w_queen_180);
+        wRotatePieceBitmaps[2] = BitmapFactory.decodeResource(res, R.drawable.w_bishop_180);
+        wRotatePieceBitmaps[3] = BitmapFactory.decodeResource(res, R.drawable.w_knight_180);
+        wRotatePieceBitmaps[4] = BitmapFactory.decodeResource(res, R.drawable.w_rook_180);
+        wRotatePieceBitmaps[5] = BitmapFactory.decodeResource(res, R.drawable.w_pawn_180);
+        wRotatePieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.w_heart_180);
+
+        bRotatePieceBitmaps[0] = BitmapFactory.decodeResource(res, R.drawable.b_king_180);
+        bRotatePieceBitmaps[1] = BitmapFactory.decodeResource(res, R.drawable.b_queen_180);
+        bRotatePieceBitmaps[2] = BitmapFactory.decodeResource(res, R.drawable.b_bishop_180);
+        bRotatePieceBitmaps[3] = BitmapFactory.decodeResource(res, R.drawable.b_knight_180);
+        bRotatePieceBitmaps[4] = BitmapFactory.decodeResource(res, R.drawable.b_rook_180);
+        bRotatePieceBitmaps[5] = BitmapFactory.decodeResource(res, R.drawable.b_pawn_180);
+        bRotatePieceBitmaps[6] = BitmapFactory.decodeResource(res, R.drawable.b_heart_180);
 
         int spriteSize = wPieceBitmaps[0].getWidth();
         spriteRect = new Rect(0, 0, spriteSize, spriteSize);
-
-        // create rotated bitmap of pieces
-        for (int i = 0; i < numPiece; i++) {
-            wRotatePieceBitmaps[i] = Bitmap.createBitmap(wPieceBitmaps[i],
-                    0, 0, spriteSize, spriteSize,
-                    rotateMatrix, false);
-            bRotatePieceBitmaps[i] = Bitmap.createBitmap(bPieceBitmaps[i],
-                    0, 0, spriteSize, spriteSize,
-                    rotateMatrix, false);
-        }
     }
 
     public void draw(Canvas canvas, Rect dstBlock, Boolean rotate) {
