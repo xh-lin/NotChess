@@ -233,7 +233,7 @@ public class Chessboard {
     }
 
     private void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
-        state.makeMove(xStart, yStart, xEnd, yEnd, promote);
+        state.makeMove(xStart, yStart, xEnd, yEnd, promote, true);
 
         deselect();
         updateMoveIndicator();              // update text of telling who's move next

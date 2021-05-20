@@ -156,7 +156,7 @@ public class GameState {
         }
     }
 
-    public void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote) {
+    public void makeMove(int xStart, int yStart, int xEnd, int yEnd, int promote, boolean doToast) {
         Piece toMove = board[yStart][xStart];
         Piece kicked = board[yEnd][xEnd];
 
@@ -187,7 +187,8 @@ public class GameState {
             updateAttacking(xStart, yStart, xKingEnd, yKingEnd);
             updateAttacking(xEnd, yEnd, xRookEnd, yRookEnd);
 
-            Toast.makeText(context, "castling", Toast.LENGTH_SHORT).show();
+            if (doToast)
+                Toast.makeText(context, "castling", Toast.LENGTH_SHORT).show();
         } else {    // make a move
             board[yEnd][xEnd] = toMove;
             board[yStart][xStart] = null;
@@ -205,7 +206,8 @@ public class GameState {
                     kicked = pieceBehind;
                     board[yBehind][xBehind] = null;
 
-                    Toast.makeText(context, "en passant", Toast.LENGTH_SHORT).show();
+                    if (doToast)
+                        Toast.makeText(context, "en passant", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -228,7 +230,8 @@ public class GameState {
                 }
                 board[yEnd][xEnd] = toMove;
 
-                Toast.makeText(context, "promotion", Toast.LENGTH_SHORT).show();
+                if (doToast)
+                    Toast.makeText(context, "promotion", Toast.LENGTH_SHORT).show();
             }
 
             // count the number of pieces left

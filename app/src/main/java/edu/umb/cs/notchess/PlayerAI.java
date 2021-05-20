@@ -101,7 +101,7 @@ public class PlayerAI {
     // For a given GameState and move to be executed, return the GameState that results from the move
     private static GameState makeMove(GameState state, int[] move) {
         GameState newState = state.clone();
-        newState.makeMove(move[0], move[1], move[2], move[3], move[4]);
+        newState.makeMove(move[0], move[1], move[2], move[3], move[4], false);
 
         if (newState.checkWinner() != 0)
             newState.points = state.playerToMove * victoryPoints;
