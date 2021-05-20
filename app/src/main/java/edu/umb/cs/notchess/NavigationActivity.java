@@ -184,6 +184,9 @@ public class NavigationActivity extends FragmentActivity {
         deselectLevelItem();
     }
 
+    // do not close menu when clicking on the blank area of the menu
+    public void onClickNothing(View view) {}
+
     public void onClickDelete(View view) {
         dbHelper.deleteLevel(levelList.ids.get(selectedLevelIdx));
         deselectLevelItem();                    // deselect list item

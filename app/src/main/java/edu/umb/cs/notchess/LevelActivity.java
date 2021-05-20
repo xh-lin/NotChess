@@ -2,6 +2,7 @@ package edu.umb.cs.notchess;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.style.TtsSpan;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -31,6 +32,9 @@ public class LevelActivity extends Activity {
     public void onClickHideView(View view) {
         view.setVisibility(View.INVISIBLE);
     }
+
+    // do not close menu when clicking on the blank area of the menu
+    public void onClickNothing(View view) {}
 
     // selected one of the promotion options
     public void onClickPromotion(View view) {

@@ -16,7 +16,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:onClick="onClickNothing">
 
         <ListView
             android:id="@+id/levelListView"
