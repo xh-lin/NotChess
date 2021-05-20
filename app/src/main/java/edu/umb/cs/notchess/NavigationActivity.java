@@ -22,6 +22,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -188,6 +190,10 @@ public class NavigationActivity extends FragmentActivity {
     public void onClickNothing(View view) {}
 
     public void onClickDelete(View view) {
+        Toast.makeText(getApplicationContext(),
+                "\"" + levelList.titles.get(selectedLevelIdx) + "\" deleted.",
+                Toast.LENGTH_SHORT).show();
+
         dbHelper.deleteLevel(levelList.ids.get(selectedLevelIdx));
         deselectLevelItem();                    // deselect list item
         levelList = dbHelper.getLevelList();    // query list with names and ids
@@ -197,6 +203,10 @@ public class NavigationActivity extends FragmentActivity {
     }
 
     public void onClickLoad(View view) {
+        Toast.makeText(getApplicationContext(),
+                "\"" + levelList.titles.get(selectedLevelIdx) + "\" loaded.",
+                Toast.LENGTH_SHORT).show();
+
         assert selectedLevelIdx != -1;      // should only be called when an item is selected
         Piece[][] newBoard = dbHelper.getBoard(levelList.ids.get(selectedLevelIdx));
         updateCustomBoard(newBoard);
@@ -222,7 +232,13 @@ public class NavigationActivity extends FragmentActivity {
         EditText editText = findViewById(R.id.titleEditText);
         String title = editText.getText().toString();           // get title
         dbHelper.saveLevel(title, chessboardEditor.getBoard()); // save into database
+
+        editText.setText("");                                   // clean text input
         onClickHideView(saveLevelView);                         // close menu
+
+        Toast.makeText(getApplicationContext(),
+                "\"" + title + "\" saved.",
+                Toast.LENGTH_SHORT).show();
     }
 
     // open the save level menu
