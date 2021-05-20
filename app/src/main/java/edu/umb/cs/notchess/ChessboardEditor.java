@@ -18,10 +18,8 @@ public class ChessboardEditor {
     static final int MAX_SIZE = 20;
     static final int DEFAULT_SIZE = 8;
 
-    private final Context context;          // context of GameView
     private final View viewToDraw;          // the View object that draws the chess board
-
-    static Piece[][] board;
+    private Piece[][] board;
     private int columns;                // dimension of the chess board
     private int rows;
     private int w;                          // View width
@@ -41,7 +39,6 @@ public class ChessboardEditor {
     private boolean buttonPressed;
 
     public ChessboardEditor(Context context, View viewToDraw) {
-        this.context = context;
         this.viewToDraw = viewToDraw;
 
         // create paints
@@ -53,6 +50,23 @@ public class ChessboardEditor {
         selectedPaint.setColor(ContextCompat.getColor(context, R.color.trans_yellow));
 
         Piece.loadAssets(context.getResources());   // load drawables for Piece
+    }
+
+    // set the chessboard and update the drawing
+    public void setBoard(Piece[][] newBoard) {
+        board = newBoard;
+        columns = newBoard[0].length;
+        rows = newBoard.length;
+        onSizeChanged(w, h);
+        viewToDraw.invalidate();
+    }
+
+    // returns a copy of the chessboard
+    public Piece[][] getBoard() {
+        Piece[][] newBoard = new Piece[board.length][];
+        for (int i = 0; i < board.length; i++)
+            newBoard[i] = board[i].clone();
+        return newBoard;
     }
 
     public void setColumns(int columns) {
@@ -69,6 +83,7 @@ public class ChessboardEditor {
         viewToDraw.invalidate();
     }
 
+    // copy pieces of the old board to a new board with different dimension
     private void updateBoardDimension() {
         if (columns != 0 && rows != 0) {
             Piece[][] newBoard = new Piece[rows][columns];
@@ -84,7 +99,7 @@ public class ChessboardEditor {
         }
     }
 
-    // being called by viewToDraw's onSizeChanged() to get the dimension of the View object
+    // update the size of each block
     public void onSizeChanged(int w, int h) {
         this.w = w;
         this.h = h;

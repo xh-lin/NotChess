@@ -51,6 +51,7 @@
     <string name="columns">Columns:</string>
     <string name="rows">Rows:</string>
     <string name="delete">Delete</string>
+    <string name="enter_title">Enter title…</string>
 
     <string-array name="ai_option">
         <item>Off</item>
